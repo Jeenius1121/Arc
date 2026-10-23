@@ -1,0 +1,49 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci
+      - run: npm test
+      - run: npx expo prebuild --platform android --no-install
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      # Published as a GitHub release so the APK can be downloaded and
+      # installed straight from a phone browser (no zip to extract).
+      - name: Publish APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: ARC Events (dernière build)
+          body: "Build de `${{ github.ref_name }}` @ ${{ github.sha }}. Télécharge le fichier .apk depuis ton téléphone Android pour l'installer."
+          prerelease: true
+          make_latest: false
+          files: android/app/build/outputs/apk/release/app-release.apk
