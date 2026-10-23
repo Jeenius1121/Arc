@@ -1,0 +1,29 @@
+name: Snapshot data sources
+
+# Downloads the raw schedule sources so their real format can be inspected
+# while developing the parsers (the dev environment cannot reach them).
+on:
+  push:
+    paths: ['.github/workflows/snapshot-sources.yml']
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download sources
+        run: |
+          mkdir out && cd out
+          UA="Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36"
+          fetch() { curl -sSL -m 60 -A "$UA" -H "Accept-Language: fr-FR,fr;q=0.9" -D "$1.headers" -o "$1" "$2" || true; }
+          fetch metaforge-event-timers.json https://metaforge.app/api/arc-raiders/event-timers
+          fetch metaforge-events-schedule.json https://metaforge.app/api/arc-raiders/events-schedule
+          fetch metaforge-page.html https://metaforge.app/arc-raiders/event-timers
+          fetch official.html https://arcraiders.com/map-conditions
+          fetch official-fr.html https://arcraiders.com/fr/map-conditions
+          date -u > fetched-at.txt
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sources
+          path: out/
