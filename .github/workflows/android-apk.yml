@@ -3,6 +3,15 @@ name: Android APK
 on:
   push:
     branches: [main, 'claude/**']
+    # Docs and tooling-only changes must not ship a new APK (it would prompt
+    # an update with nothing new in it).
+    paths-ignore:
+      - 'README.md'
+      - 'AGENTS.md'
+      - '.github/workflows/check-sources.yml'
+      - '.github/workflows/gamedata.yml'
+      - '.github/workflows/peek-*.yml'
+      - 'scripts/check-sources.ts'
   workflow_dispatch:
 
 permissions:
@@ -70,7 +79,11 @@ jobs:
 
       - name: Write version.json
         run: |
-          echo "{\"buildNumber\": $BUILD_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > version.json
+          node -e '
+            const version = require("./app.json").expo.version;
+            const notes = JSON.parse(require("child_process").execSync("node scripts/release-notes.ts").toString());
+            require("fs").writeFileSync("version.json", JSON.stringify({ buildNumber: Number(process.env.BUILD_NUMBER), version, notes, commit: process.env.GITHUB_SHA }));
+          '
           cat version.json
 
       # Published as a GitHub release so the APK can be downloaded and
@@ -79,8 +92,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-latest
-          name: ARC Events (dernière build)
-          body: "Build de `${{ github.ref_name }}` @ ${{ github.sha }}. Télécharge le fichier .apk depuis ton téléphone Android pour l'installer."
+          name: ARC Events (dernière version)
+          body: "Dernière version de l'app (build ${{ github.run_number }}). Télécharge le fichier .apk depuis ton téléphone Android pour l'installer ; ensuite l'app se met à jour toute seule."
           prerelease: true
           make_latest: false
           files: android/app/build/outputs/apk/release/app-release.apk

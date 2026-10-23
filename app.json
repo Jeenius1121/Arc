@@ -2,7 +2,7 @@
   "expo": {
     "name": "ARC Events",
     "slug": "arc-raiders-events",
-    "version": "1.0.0",
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

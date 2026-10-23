@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 
 /**
  * Self-update for the sideloaded Android APK. CI publishes the APK and a
- * version.json ({ buildNumber }) on the public `apk-latest` release; the app
+ * version.json ({ buildNumber, version, notes }) on the public `apk-latest` release; the app
  * compares that number with its own and hands the downloaded APK to the
  * Android package installer, which updates the app in place.
  */
@@ -13,20 +13,32 @@ const RELEASE_URL = 'https://github.com/Jeenius1121/Arc/releases/download/apk-la
 
 export interface UpdateInfo {
   buildNumber: number;
+  /** Player-facing version, e.g. "1.7.0". */
+  version: string;
+  /** What is new in that version (newest CHANGELOG.md section). */
+  notes: string[];
   apkUrl: string;
 }
 
-/** Build number baked in at build time (0 for local/dev builds). */
+/** Build number baked in at build time (0 for local/dev builds); compared to find updates. */
 export const currentBuild: number = Number(Constants.expoConfig?.extra?.buildNumber ?? 0);
+
+/** Version shown to the player, e.g. "1.7.0". */
+export const currentVersion: string = Constants.expoConfig?.version ?? '?';
 
 export const updatesSupported = Platform.OS === 'android';
 
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   const res = await fetch(`${RELEASE_URL}/version.json?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } });
   if (!res.ok) throw new Error(res.status === 404 ? 'page des versions inaccessible (dépôt privé ?)' : `HTTP ${res.status}`);
-  const { buildNumber } = (await res.json()) as { buildNumber: number };
-  if (!(buildNumber > currentBuild)) return null;
-  return { buildNumber, apkUrl: `${RELEASE_URL}/app-release.apk` };
+  const info = (await res.json()) as { buildNumber: number; version?: string; notes?: string[] };
+  if (!(info.buildNumber > currentBuild)) return null;
+  return {
+    buildNumber: info.buildNumber,
+    version: info.version ?? String(info.buildNumber),
+    notes: info.notes ?? [],
+    apkUrl: `${RELEASE_URL}/app-release.apk`,
+  };
 }
 
 /** Downloads the APK (reporting progress 0..1) and opens the system installer. */

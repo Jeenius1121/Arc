@@ -59,7 +59,7 @@ import {
   savePresets,
   saveRegion,
 } from './src/data/storage.ts';
-import { checkForUpdate, currentBuild, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
+import { checkForUpdate, currentBuild, currentVersion, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
 import { refreshWidget } from './src/widget/update.tsx';
 import { diffItems, type GameData } from './src/core/gamedata.ts';
 import { planSlots } from './src/core/planner.ts';
@@ -219,12 +219,16 @@ function Main() {
       const update = await checkForUpdate();
       setUpdateStatus(null);
       if (update) {
-        Alert.alert('Mise à jour disponible', `La version ${update.buildNumber} est disponible (tu as la ${currentBuild}). L’installer maintenant ?`, [
+        // A same-version rebuild (e.g. fresher game data) has no new notes.
+        const sameVersion = update.version === currentVersion;
+        const notes = !sameVersion && update.notes.length ? `\n\nNouveautés :\n${update.notes.map((n) => `• ${n}`).join('\n')}` : '';
+        const title = sameVersion ? `Une mise à jour de la version ${update.version} est disponible.` : `La version ${update.version} est disponible (tu as la ${currentVersion}).`;
+        Alert.alert('Mise à jour disponible', `${title}${notes}\n\nL’installer maintenant ?`, [
           { text: 'Plus tard', style: 'cancel' },
           { text: 'Installer', onPress: () => startUpdate(update) },
         ]);
       } else if (!silent) {
-        Alert.alert('Application à jour', `Tu as la dernière version (${currentBuild}).`);
+        Alert.alert('Application à jour', `Tu as la dernière version (${currentVersion}).`);
       }
     } catch (e) {
       setUpdateStatus(null);
@@ -1130,7 +1134,9 @@ function SettingsModal(props: {
             {updatesSupported && (
               <>
                 <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Mises à jour</Text>
-                <Text style={[styles.text, { paddingHorizontal: 16, marginTop: 4 }]}>Version installée : {currentBuild || 'dev'}</Text>
+                <Text style={[styles.text, { paddingHorizontal: 16, marginTop: 4 }]}>Version installée : {currentVersion}
+                  {currentBuild ? '' : ' (dev)'}
+                </Text>
                 <View style={styles.switchRow}>
                   <Text style={[styles.text, { flex: 1 }]}>Vérifier à chaque démarrage</Text>
                   <Switch value={props.autoUpdate} onValueChange={props.onAutoUpdate} />

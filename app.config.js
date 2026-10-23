@@ -1,10 +1,11 @@
-// BUILD_NUMBER is set by the APK workflow (GitHub run number): it becomes the
-// Android versionCode and lets the app compare itself with the latest release.
+// The version shown to players ("1.7.0") is `expo.version` in app.json and is
+// bumped by hand: major for a redesign, minor for new features, patch for
+// fixes. BUILD_NUMBER, set by the APK workflow (GitHub run number), becomes
+// the Android versionCode and is what the app compares to find updates.
 const buildNumber = Number(process.env.BUILD_NUMBER || 0);
 
 module.exports = ({ config }) => ({
   ...config,
-  version: buildNumber ? `1.0.${buildNumber}` : config.version,
   android: { ...config.android, versionCode: Math.max(buildNumber, 1) },
   extra: { ...config.extra, buildNumber },
 });
