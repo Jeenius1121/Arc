@@ -26,17 +26,36 @@ jobs:
       - name: Print sources
         working-directory: out
         run: |
-          for f in *.headers; do echo "=== $f"; grep -iE '^HTTP|content-type|location' "$f"; done
-          for f in metaforge-event-timers.json metaforge-events-schedule.json; do
-            echo "=== $f"; (jq . "$f" 2>/dev/null || cat "$f") | head -c 60000; echo
+          UA="Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36"
+          echo "=== MetaForge summary"
+          jq -c '{keys: keys, region, cachedAt, count: (.data|length), first: .data[0:3]}' metaforge-event-timers.json || head -c 2000 metaforge-event-timers.json
+          for r in europe eu na us america asia oce; do
+            echo "=== MetaForge ?region=$r"
+            curl -sS -m 30 -A "$UA" "https://metaforge.app/api/arc-raiders/event-timers?region=$r" | jq -c '{region, count: (.data|length), first: .data[0:2]}' 2>&1 | head -c 1500; echo
           done
-          for f in official.html official-fr.html metaforge-page.html; do
-            echo "=== $f ($(wc -c < "$f") bytes)"
-            grep -oE '<title>[^<]*</title>' "$f" | head -1
-            grep -oE '"[^"]{0,40}(Night|Nocturne|nocturne|Pendola|Redirect|Storm|Tempête|condition|Condition)[^"]{0,80}"' "$f" | sort -u | head -80
-            grep -oE '(src|href)="[^"]*(\.json|/api/)[^"]*"' "$f" | sort -u | head -20
-            grep -oE 'https?://[a-zA-Z0-9./_-]*(api|json|graphql)[a-zA-Z0-9./_?=-]*' "$f" | sort -u | head -30
-          done
+          echo "=== Official RSC payload around the conditions"
+          python3 - official-fr.html <<'PY'
+          import json, re, sys
+          html = open(sys.argv[1], encoding='utf-8').read()
+          chunks = []
+          for m in re.finditer(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)', html):
+              try: chunks.append(json.loads(m.group(1)))
+              except Exception: pass
+          flight = ''.join(chunks)
+          print('flight length', len(flight))
+          for key in ['conditionItems', 'currentCondition', 'region', 'Redirection', 'startTime', 'startsAt']:
+              for m in list(re.finditer(key, flight))[:2]:
+                  print('---', key, m.start())
+                  print(flight[max(0, m.start() - 600): m.start() + 2500])
+          PY
+          echo "=== Official HTML visible text sample"
+          python3 - official-fr.html <<'PY'
+          import re, sys
+          html = open(sys.argv[1], encoding='utf-8').read()
+          body = re.sub(r'<script[\s\S]*?</script>', '', html)
+          i = body.find('map-condition-list_list')
+          print(re.sub(r'\s+', ' ', body[i:i + 6000]))
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: sources
