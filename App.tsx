@@ -8,6 +8,7 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
+  SectionList,
   StyleSheet,
   Switch,
   Text,
@@ -15,12 +16,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SvgXml } from 'react-native-svg';
 
 import { BEFORE_OPTIONS, alertSummary, optionAvailable, pruneAlerts, type EventAlert } from './src/core/alerts.ts';
 import { CATEGORIES, categoriesOf } from './src/core/categories.ts';
-import { DEFAULT_FAVORITES, type Favorites } from './src/core/favorites.ts';
-import { updateBackgroundRefresh } from './src/data/background.ts';
-import { applyFilter, countdown, distinct, toggle } from './src/core/filter.ts';
+import { conditionIcon, conditionInfo } from './src/core/conditionInfo.ts';
+import { DEFAULT_FAVORITES, findRule, isFollowed, setRule, type FavoriteRule, type Favorites } from './src/core/favorites.ts';
+import { applyFilter, countdown, distinct, duration, toggle } from './src/core/filter.ts';
+import { groupByMoment, mapsNow, occurrencesOf, rareConditions } from './src/core/insights.ts';
+import { registerBackgroundRefresh } from './src/data/background.ts';
 import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
 import { fetchEvents, type FetchResult } from './src/data/sources.ts';
@@ -28,6 +32,7 @@ import {
   cancelAlert,
   ensureNotificationsReady,
   exactAlarmsAllowed,
+  onNotificationOpened,
   requestExactAlarms,
   rescheduleAll,
   scheduleAlert,
@@ -50,8 +55,11 @@ import {
   saveRegion,
 } from './src/data/storage.ts';
 import { checkForUpdate, currentBuild, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
+import { refreshWidget } from './src/widget/update.tsx';
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
+/** Past this age the schedule may be wrong (offline phone): warn the user. */
+const STALE_MS = 60 * 60 * 1000;
 
 const DEFAULT_PRESETS: FilterPreset[] = [
   { id: 'night', name: 'Nuit', maps: [], conditions: [], categories: ['night'], upcomingOnly: false },
@@ -95,6 +103,9 @@ function Main() {
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Favorites>(DEFAULT_FAVORITES);
   const [favoritesLoaded, setFavoritesLoaded] = useState(false);
+  const [view, setView] = useState<'list' | 'maps'>('list');
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [favoriteSheet, setFavoriteSheet] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -107,7 +118,8 @@ function Main() {
     setErrors(errors);
     if (result) {
       setData(result);
-      saveCache(result);
+      await saveCache(result);
+      refreshWidget();
     }
     setLoading(false);
   }, []);
@@ -127,7 +139,10 @@ function Main() {
       const auto = await loadAutoUpdate();
       setAutoUpdate(auto);
       if (auto) lookForUpdate(true);
+      registerBackgroundRefresh();
     })();
+    // A tap on one of our notifications opens that event's details.
+    return onNotificationOpened(setDetailId);
   }, []);
 
   const startUpdate = async (update: UpdateInfo) => {
@@ -172,13 +187,20 @@ function Main() {
   const events = data?.events ?? [];
   const maps = useMemo(() => distinct(events, 'map'), [events]);
   const conditions = useMemo(() => distinct(events, 'condition'), [events]);
-  const visible = useMemo(() => applyFilter(events, filter, now), [events, filter, now]);
+  const visible = useMemo(() => {
+    const filtered = applyFilter(events, filter, now);
+    return activePreset === 'favorites' ? filtered.filter((e) => isFollowed(favorites, e)) : filtered;
+  }, [events, filter, now, activePreset, favorites]);
+  const sections = useMemo(() => groupByMoment(visible, now), [visible, now]);
+  const rare = useMemo(() => rareConditions(events), [events]);
+  const detailEvent = detailId ? events.find((e) => e.id === detailId) : undefined;
+  const stale = data !== null && now - data.fetchedAt > STALE_MS;
 
   // Keep favourite notifications in line with the latest schedule, bells and choices.
   useEffect(() => {
     if (!favoritesLoaded || events.length === 0) return;
-    const following = favorites.conditions.length > 0;
-    updateBackgroundRefresh(following);
+    const following = favorites.rules.length > 0;
+    refreshWidget();
     (async () => {
       if (following && !(await ensureNotificationsReady())) return;
       await syncFavorites(events, favorites, alerts).catch(() => {});
@@ -190,8 +212,11 @@ function Main() {
     saveFavorites(next);
   };
 
-  const toggleFavorite = (condition: string) =>
-    changeFavorites({ ...favorites, conditions: toggle(favorites.conditions, condition) });
+  /** First tap follows the condition on every map; on a followed one it opens the map picker. */
+  const onHeart = (condition: string) => {
+    if (findRule(favorites, condition)) setFavoriteSheet(condition);
+    else changeFavorites(setRule(favorites, condition, []));
+  };
 
   const selectPreset = (p: FilterPreset | null) => {
     setActivePreset(p?.id ?? null);
@@ -288,14 +313,28 @@ function Main() {
         </Pressable>
       </View>
 
+      <View style={styles.tabs}>
+        {(
+          [
+            ['list', 'Liste'],
+            ['maps', 'Cartes · maintenant'],
+          ] as const
+        ).map(([id, label]) => (
+          <Pressable key={id} onPress={() => setView(id)} style={[styles.tab, view === id && styles.tabActive]}>
+            <Text style={[styles.tabText, view === id && styles.tabTextActive]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {view === 'list' && (
       <View style={styles.presetBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
           <Chip label="Tous" active={activePreset === null && filterCount === 0} onPress={() => selectPreset(null)} />
-          {favorites.conditions.length > 0 && (
+          {favorites.rules.length > 0 && (
             <Chip
               label="❤ Favoris"
               active={activePreset === 'favorites'}
-              onPress={() => selectPreset({ id: 'favorites', name: 'Favoris', ...EMPTY_FILTER, conditions: favorites.conditions })}
+              onPress={() => selectPreset({ id: 'favorites', name: 'Favoris', ...EMPTY_FILTER })}
             />
           )}
           {presets.map((p) => (
@@ -306,6 +345,7 @@ function Main() {
           <Text style={styles.filterButtonText}>Filtres{filterCount ? ` (${filterCount})` : ''}</Text>
         </Pressable>
       </View>
+      )}
 
       {updateStatus && (
         <View style={styles.updateBanner}>
@@ -316,31 +356,54 @@ function Main() {
 
       {errors.length > 0 && !data && <ErrorBox errors={errors} />}
 
-      <FlatList
-        data={visible}
-        keyExtractor={(e) => e.id}
-        renderItem={({ item }) => (
-          <EventCard
-            event={item}
-            now={now}
-            alert={alerts[item.id]}
-            favorite={favorites.conditions.includes(item.condition)}
-            onBell={() => onBell(item)}
-            onHeart={() => toggleFavorite(item.condition)}
-          />
-        )}
-        contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => {
-              if (region) refresh(region);
-            }} tintColor={colors.accent} />}
-        ListEmptyComponent={
-          loading ? (
-            <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
-          ) : (
-            <Text style={styles.empty}>{events.length ? 'Aucun événement ne correspond à ce filtre.' : 'Tire vers le bas pour charger les événements.'}</Text>
-          )
-        }
-      />
+      {stale && data && (
+        <View style={styles.staleBanner}>
+          <Text style={styles.staleText}>
+            ⚠ Planning du {new Date(data.fetchedAt).toLocaleString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}, pas mis à jour
+            depuis {duration(now - data.fetchedAt)}. Vérifie ta connexion puis tire la liste vers le bas.
+          </Text>
+        </View>
+      )}
+
+      {view === 'maps' ? (
+        <MapsView events={events} now={now} onOpen={(e) => setDetailId(e.id)} />
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(e) => e.id}
+          stickySectionHeadersEnabled={false}
+          renderSectionHeader={({ section }) => <Text style={styles.listHeader}>{section.title}</Text>}
+          renderItem={({ item }) => (
+            <EventCard
+              event={item}
+              now={now}
+              alert={alerts[item.id]}
+              favorite={isFollowed(favorites, item)}
+              rare={rare.has(item.condition)}
+              onOpen={() => setDetailId(item.id)}
+              onBell={() => onBell(item)}
+              onHeart={() => onHeart(item.condition)}
+            />
+          )}
+          contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={() => {
+                if (region) refresh(region);
+              }}
+              tintColor={colors.accent}
+            />
+          }
+          ListEmptyComponent={
+            loading ? (
+              <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
+            ) : (
+              <Text style={styles.empty}>{events.length ? 'Aucun événement ne correspond à ce filtre.' : 'Tire vers le bas pour charger les événements.'}</Text>
+            )
+          }
+        />
+      )}
 
       <FiltersModal
         visible={showFilters}
@@ -370,7 +433,32 @@ function Main() {
         onExactAlarmsGranted={() => resyncAlerts(alerts)}
         favorites={favorites}
         onFavorites={changeFavorites}
+        onEditFavorite={setFavoriteSheet}
         onClose={() => setShowSettings(false)}
+      />
+
+      <EventDetail
+        event={detailEvent}
+        events={events}
+        now={now}
+        alert={detailEvent ? alerts[detailEvent.id] : undefined}
+        followed={detailEvent ? isFollowed(favorites, detailEvent) : false}
+        rare={detailEvent ? rare.has(detailEvent.condition) : false}
+        onBell={(e) => onBell(e)}
+        onHeart={(e) => onHeart(e.condition)}
+        onOpen={(e) => setDetailId(e.id)}
+        onClose={() => setDetailId(null)}
+      />
+
+      <FavoriteSheet
+        condition={favoriteSheet}
+        rule={favoriteSheet ? findRule(favorites, favoriteSheet) : undefined}
+        maps={favoriteSheet ? mapsFor(events, favoriteSheet, maps) : []}
+        onSave={(selected) => {
+          if (favoriteSheet) changeFavorites(setRule(favorites, favoriteSheet, selected));
+          setFavoriteSheet(null);
+        }}
+        onClose={() => setFavoriteSheet(null)}
       />
 
       <AlertModal
@@ -392,10 +480,12 @@ function EventCard(props: {
   now: number;
   alert?: EventAlert;
   favorite: boolean;
+  rare: boolean;
+  onOpen: () => void;
   onBell: () => void;
   onHeart: () => void;
 }) {
-  const { event, now, alert, favorite, onBell, onHeart } = props;
+  const { event, now, alert, favorite, rare, onOpen, onBell, onHeart } = props;
   const { running, text } = countdown(event, now);
   const fmt = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const day = new Date(event.start).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
@@ -404,9 +494,13 @@ function EventCard(props: {
     .filter(Boolean)
     .join(' · ');
   return (
-    <View style={[styles.card, running && { borderColor: colors.live }]}>
+    <Pressable onPress={onOpen} style={[styles.card, running && { borderColor: colors.live }]}>
+      <ConditionIcon condition={event.condition} color={running ? colors.live : colors.accent} />
       <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{event.condition}</Text>
+        <Text style={styles.cardTitle}>
+          {event.condition}
+          {rare ? <Text style={styles.rareBadge}>  ✨ Rare</Text> : null}
+        </Text>
         <Text style={styles.cardMap}>{event.map}</Text>
         <Text style={styles.cardMeta}>
           {day} · {fmt(event.start)} – {fmt(event.end)}
@@ -421,7 +515,7 @@ function EventCard(props: {
             onPress={onHeart}
             hitSlop={8}
             style={[styles.bell, favorite && styles.heartActive]}
-            accessibilityLabel={favorite ? `Ne plus suivre ${event.condition}` : `Suivre ${event.condition}`}
+            accessibilityLabel={favorite ? `Réglages du suivi de ${event.condition}` : `Suivre ${event.condition}`}
           >
             <Text style={[styles.bellText, !favorite && { opacity: 0.45 }]}>{favorite ? '❤️' : '🤍'}</Text>
           </Pressable>
@@ -435,7 +529,187 @@ function EventCard(props: {
           </Pressable>
         </View>
       </View>
-    </View>
+    </Pressable>
+  );
+}
+
+function ConditionIcon({ condition, size = 24, color = colors.accent }: { condition: string; size?: number; color?: string }) {
+  const xml = conditionIcon(condition);
+  if (!xml) return <View style={[styles.iconFallback, { width: size, height: size, borderColor: color }]} />;
+  return <SvgXml xml={xml} width={size} height={size} color={color} />;
+}
+
+/** One tile per map: what runs there now and what comes next. */
+function MapsView({ events, now, onOpen }: { events: EventOccurrence[]; now: number; onOpen: (e: EventOccurrence) => void }) {
+  const statuses = mapsNow(events, now);
+  if (statuses.length === 0) return <Text style={styles.empty}>Aucune donnée chargée.</Text>;
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      {statuses.map((s) => (
+        <View key={s.map} style={styles.mapTile}>
+          <Text style={styles.mapTitle}>{s.map}</Text>
+          {s.current.length === 0 ? (
+            <Text style={styles.cardMeta}>Aucun événement en cours</Text>
+          ) : (
+            s.current.map((e) => (
+              <Pressable key={e.id} onPress={() => onOpen(e)} style={styles.mapRow}>
+                <ConditionIcon condition={e.condition} color={colors.live} />
+                <Text style={[styles.cardTitle, { flex: 1 }]}>{e.condition}</Text>
+                <Text style={[styles.smallCountdown, { color: colors.live }]}>fin dans {duration(e.end - now)}</Text>
+              </Pressable>
+            ))
+          )}
+          {s.next && (
+            <Pressable onPress={() => onOpen(s.next!)} style={styles.mapRow}>
+              <ConditionIcon condition={s.next.condition} color={colors.muted} size={18} />
+              <Text style={[styles.text, { flex: 1 }]}>Ensuite : {s.next.condition}</Text>
+              <Text style={styles.smallCountdown}>dans {duration(s.next.start - now)}</Text>
+            </Pressable>
+          )}
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+/** Full details of one occurrence: effects, timing, the next ones, bell and heart. */
+function EventDetail(props: {
+  event: EventOccurrence | undefined;
+  events: EventOccurrence[];
+  now: number;
+  alert?: EventAlert;
+  followed: boolean;
+  rare: boolean;
+  onBell: (e: EventOccurrence) => void;
+  onHeart: (e: EventOccurrence) => void;
+  onOpen: (e: EventOccurrence) => void;
+  onClose: () => void;
+}) {
+  const { event, now } = props;
+  if (!event) return null;
+  const info = conditionInfo(event.condition);
+  const { running, text } = countdown(event, now);
+  const fmt = (ms: number) =>
+    new Date(ms).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const others = occurrencesOf(props.events, event.condition, now).filter((e) => e.id !== event.id).slice(0, 8);
+
+  return (
+    <Modal visible animationType="slide" onRequestClose={props.onClose}>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.root}>
+          <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <ConditionIcon condition={event.condition} size={48} color={running ? colors.live : colors.accent} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.title}>{event.condition}</Text>
+                <Text style={styles.cardMap}>{event.map}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {info && <Text style={styles.badge}>{info.kind === 'major' ? 'Condition majeure' : 'Condition mineure'}</Text>}
+              {props.rare && <Text style={[styles.badge, styles.badgeRare]}>✨ Rare aujourd’hui</Text>}
+              {props.followed && <Text style={[styles.badge, styles.badgeHeart]}>❤ Suivi</Text>}
+            </View>
+            <View style={styles.detailBox}>
+              <Text style={[styles.text, { fontSize: 16, fontWeight: '600' }, running && { color: colors.live }]}>{text}</Text>
+              <Text style={styles.cardMeta}>
+                {fmt(event.start)} → {fmt(event.end)}
+              </Text>
+            </View>
+
+            <Text style={styles.sectionTitleFlush}>Effets</Text>
+            {info ? (
+              info.effects.map((line) => (
+                <Text key={line} style={styles.effect}>
+                  • {line}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.cardMeta}>Pas encore de description pour cet événement.</Text>
+            )}
+
+            <View style={[styles.saveRow, { paddingHorizontal: 0, marginTop: 4 }]}>
+              <Pressable onPress={() => props.onHeart(event)} style={[styles.button, styles.buttonGhost, { flex: 1 }]}>
+                <Text style={[styles.buttonText, { color: colors.text }]}>{props.followed ? '❤ Suivi · modifier' : '🤍 Suivre'}</Text>
+              </Pressable>
+              <Pressable onPress={() => props.onBell(event)} style={[styles.button, { flex: 1 }]}>
+                <Text style={styles.buttonText}>
+                  {props.alert ? `🔔 ${alertSummary(props.alert)}` : running ? '🔔 Prévenir à la fin' : '🔔 Rappel'}
+                </Text>
+              </Pressable>
+            </View>
+
+            <Text style={[styles.sectionTitleFlush, { marginTop: 8 }]}>Prochaines fois</Text>
+            {others.length === 0 ? (
+              <Text style={styles.cardMeta}>Aucune autre occurrence dans le planning chargé (24 h).</Text>
+            ) : (
+              others.map((e) => (
+                <Pressable key={e.id} onPress={() => props.onOpen(e)} style={styles.mapRow}>
+                  <Text style={[styles.text, { flex: 1 }]}>{e.map}</Text>
+                  <Text style={styles.smallCountdown}>{fmt(e.start)}</Text>
+                </Pressable>
+              ))
+            )}
+          </ScrollView>
+          <View style={styles.modalFooter}>
+            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonWide]}>
+              <Text style={styles.buttonText}>Fermer</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </Modal>
+  );
+}
+
+/** Maps where `condition` appears in the schedule (all maps when it is not scheduled right now). */
+function mapsFor(events: EventOccurrence[], condition: string, allMaps: string[]): string[] {
+  const found = distinct(
+    events.filter((e) => e.condition === condition),
+    'map',
+  );
+  return found.length > 0 ? found : allMaps;
+}
+
+/** Choose on which maps a followed condition notifies, or stop following it. */
+function FavoriteSheet(props: {
+  condition: string | null;
+  rule?: FavoriteRule;
+  maps: string[];
+  onSave: (maps: string[] | null) => void;
+  onClose: () => void;
+}) {
+  const [selected, setSelected] = useState<string[]>([]);
+  useEffect(() => setSelected(props.rule?.maps ?? []), [props.condition, props.rule]);
+  if (!props.condition) return null;
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={props.onClose}>
+      <Pressable style={styles.sheetBackdrop} onPress={props.onClose}>
+        <Pressable style={styles.sheet} onPress={() => {}}>
+          <Text style={styles.title}>❤ {props.condition}</Text>
+          <Text style={[styles.cardMeta, { marginBottom: 8 }]}>Me prévenir sur :</Text>
+          <CheckRow label="Toutes les cartes" checked={selected.length === 0} onPress={() => setSelected([])} />
+          {props.maps.map((m) => (
+            <CheckRow key={m} label={m} checked={selected.includes(m)} onPress={() => setSelected((list) => toggle(list, m))} />
+          ))}
+          <View style={[styles.saveRow, { paddingHorizontal: 0, marginTop: 16 }]}>
+            {props.rule && (
+              <Pressable onPress={() => props.onSave(null)} style={[styles.button, styles.buttonGhost]}>
+                <Text style={[styles.buttonText, { color: colors.danger }]}>Ne plus suivre</Text>
+              </Pressable>
+            )}
+            <View style={{ flex: 1 }} />
+            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonGhost]}>
+              <Text style={[styles.buttonText, { color: colors.text }]}>Annuler</Text>
+            </Pressable>
+            <Pressable onPress={() => props.onSave(selected)} style={styles.button}>
+              <Text style={styles.buttonText}>Valider</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -609,8 +883,12 @@ function SettingsModal(props: {
   onExactAlarmsGranted: () => void;
   favorites: Favorites;
   onFavorites: (f: Favorites) => void;
+  onEditFavorite: (condition: string) => void;
   onClose: () => void;
 }) {
+  const fav = props.favorites;
+  const setQuiet = (patch: Partial<Favorites['quiet']>) => props.onFavorites({ ...fav, quiet: { ...fav.quiet, ...patch } });
+  const hour = (h: number) => `${String((h + 24) % 24).padStart(2, '0')} h`;
   return (
     <Modal visible={props.visible} animationType="slide" onRequestClose={props.onClose}>
       <SafeAreaProvider>
@@ -630,34 +908,45 @@ function SettingsModal(props: {
             {props.errors.length > 0 && <ErrorBox errors={props.errors} />}
 
             <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Favoris ❤</Text>
-            {props.favorites.conditions.length === 0 ? (
-              <Text style={styles.hint}>Touche le cœur d’un événement pour être prévenu à chaque fois qu’il revient, sur n’importe quelle carte.</Text>
+            {fav.rules.length === 0 ? (
+              <Text style={styles.hint}>Touche le cœur d’un événement pour être prévenu à chaque fois qu’il revient.</Text>
             ) : (
               <>
                 <View style={[styles.chipRow, { flexWrap: 'wrap' }]}>
-                  {props.favorites.conditions.map((c) => (
+                  {fav.rules.map((r) => (
                     <Chip
-                      key={c}
-                      label={`${c}  ✕`}
+                      key={r.condition}
+                      label={`${r.condition} · ${r.maps.length ? r.maps.join(', ') : 'toutes les cartes'}`}
                       active
-                      onPress={() => props.onFavorites({ ...props.favorites, conditions: props.favorites.conditions.filter((x) => x !== c) })}
+                      onPress={() => props.onEditFavorite(r.condition)}
                     />
                   ))}
                 </View>
-                <Text style={styles.hint}>Me prévenir :</Text>
+                <Text style={styles.hint}>Touche un favori pour choisir ses cartes ou l’enlever. Me prévenir :</Text>
                 <View style={[styles.chipRow, { flexWrap: 'wrap' }]}>
                   {BEFORE_OPTIONS.filter((o) => o.minutes <= 60).map((o) => (
                     <Chip
                       key={o.minutes}
                       label={o.minutes === 0 ? 'Au début' : o.label}
-                      active={props.favorites.minutesBefore.includes(o.minutes)}
-                      onPress={() =>
-                        props.onFavorites({ ...props.favorites, minutesBefore: toggle(props.favorites.minutesBefore, o.minutes) })
-                      }
+                      active={fav.minutesBefore.includes(o.minutes)}
+                      onPress={() => props.onFavorites({ ...fav, minutesBefore: toggle(fav.minutesBefore, o.minutes) })}
                     />
                   ))}
                 </View>
               </>
+            )}
+
+            <View style={styles.switchRow}>
+              <Text style={[styles.text, { flex: 1 }]}>Heures calmes (pas de notification de favori)</Text>
+              <Switch value={fav.quiet.enabled} onValueChange={(v) => setQuiet({ enabled: v })} />
+            </View>
+            {fav.quiet.enabled && (
+              <View style={[styles.saveRow, { marginTop: 8 }]}>
+                <Text style={styles.text}>De</Text>
+                <Stepper label={hour(fav.quiet.start)} onMinus={() => setQuiet({ start: (fav.quiet.start + 23) % 24 })} onPlus={() => setQuiet({ start: (fav.quiet.start + 1) % 24 })} />
+                <Text style={styles.text}>à</Text>
+                <Stepper label={hour(fav.quiet.end)} onMinus={() => setQuiet({ end: (fav.quiet.end + 23) % 24 })} onPlus={() => setQuiet({ end: (fav.quiet.end + 1) % 24 })} />
+              </View>
             )}
 
             {props.visible && <NotificationSettings onExactAlarmsGranted={props.onExactAlarmsGranted} />}
@@ -739,6 +1028,20 @@ function NotificationSettings({ onExactAlarmsGranted }: { onExactAlarmsGranted: 
   );
 }
 
+function Stepper(props: { label: string; onMinus: () => void; onPlus: () => void }) {
+  return (
+    <View style={styles.stepper}>
+      <Pressable onPress={props.onMinus} hitSlop={6} style={styles.stepperButton}>
+        <Text style={styles.text}>−</Text>
+      </Pressable>
+      <Text style={[styles.text, { minWidth: 44, textAlign: 'center' }]}>{props.label}</Text>
+      <Pressable onPress={props.onPlus} hitSlop={6} style={styles.stepperButton}>
+        <Text style={styles.text}>+</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function ErrorBox({ errors }: { errors: string[] }) {
   return (
     <View style={styles.errorBox}>
@@ -817,4 +1120,26 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, textAlign: 'center', marginTop: 40 },
   errorBox: { marginHorizontal: 16, marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: '#2a1618', borderWidth: 1, borderColor: colors.danger },
   errorText: { color: colors.danger, fontSize: 12 },
+  tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 6, marginBottom: 2, borderRadius: 10, backgroundColor: colors.card, padding: 3 },
+  tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
+  tabActive: { backgroundColor: colors.accent },
+  tabText: { color: colors.muted, fontWeight: '600' },
+  tabTextActive: { color: '#111' },
+  listHeader: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 },
+  staleBanner: { marginHorizontal: 16, marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: '#2a2414', borderWidth: 1, borderColor: colors.accent },
+  staleText: { color: colors.accent, fontSize: 12 },
+  rareBadge: { color: '#c4b5fd', fontSize: 12, fontWeight: '700' },
+  iconFallback: { borderWidth: 2, borderRadius: 6, opacity: 0.6 },
+  mapTile: { backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 4 },
+  mapTitle: { color: colors.accent, fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  mapRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+  smallCountdown: { color: colors.muted, fontSize: 13, fontVariant: ['tabular-nums'] },
+  badge: { color: colors.text, fontSize: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden' },
+  badgeRare: { color: '#c4b5fd', borderColor: '#7c3aed' },
+  badgeHeart: { color: colors.danger, borderColor: colors.danger },
+  detailBox: { backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 4 },
+  sectionTitleFlush: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  effect: { color: colors.text, fontSize: 15, lineHeight: 22 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.card, borderRadius: 8, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 6, paddingVertical: 4 },
+  stepperButton: { paddingHorizontal: 8, paddingVertical: 2 },
 });

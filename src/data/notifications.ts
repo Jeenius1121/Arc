@@ -63,10 +63,11 @@ export async function requestExactAlarms(): Promise<boolean> {
   return (await Notifications.requestExactAlarmPermissionsAsync().catch(() => ({ granted: false }))).granted;
 }
 
-async function schedule(at: number, title: string, body: string, identifier?: string): Promise<string> {
+async function schedule(at: number, title: string, body: string, eventId?: string, identifier?: string): Promise<string> {
   return Notifications.scheduleNotificationAsync({
     identifier,
-    content: { title, body },
+    // eventId lets a tap on the notification open that event's details.
+    content: { title, body, data: eventId ? { eventId } : {} },
     // alarmClock (AlarmManager.setAlarmClock) is never deferred or throttled by
     // Doze, unlike regular alarms which may fire only once every ~9 minutes.
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: at, channelId: CHANNEL_ID, delivery: 'alarmClock' },
@@ -75,7 +76,7 @@ async function schedule(at: number, title: string, body: string, identifier?: st
 
 export async function scheduleAlert(alert: Omit<EventAlert, 'notificationIds'>): Promise<string[]> {
   const ids: string[] = [];
-  for (const t of triggersFor(alert, Date.now())) ids.push(await schedule(t.at, t.title, t.body));
+  for (const t of triggersFor(alert, Date.now())) ids.push(await schedule(t.at, t.title, t.body, alert.event.id));
   return ids;
 }
 
@@ -115,7 +116,7 @@ export async function syncFavorites(events: EventOccurrence[], fav: Favorites, a
   const existing = new Set(scheduled);
   await Promise.all(scheduled.filter((id) => !wantedIds.has(id)).map((id) => Notifications.cancelScheduledNotificationAsync(id)));
   for (const t of wanted) {
-    if (!existing.has(t.id)) await schedule(t.at, `❤ ${t.title}`, t.body, t.id);
+    if (!existing.has(t.id)) await schedule(t.at, `❤ ${t.title}`, t.body, t.eventId, t.id);
   }
 }
 
@@ -130,4 +131,15 @@ export async function sendTestNotifications(): Promise<void> {
   for (const [i, s] of [15, 30, 45].entries()) {
     await schedule(now + s * 1000, `Test ARC Events ${i + 1}/3`, `Notification de test envoyée ${s} s après l’appui.`);
   }
+}
+
+/** Calls `open(eventId)` when the user taps one of our notifications (also the one that launched the app). */
+export function onNotificationOpened(open: (eventId: string) => void): () => void {
+  const handle = (r: Notifications.NotificationResponse | null) => {
+    const eventId = r?.notification.request.content.data?.eventId;
+    if (typeof eventId === 'string') open(eventId);
+  };
+  Notifications.getLastNotificationResponseAsync().then(handle).catch(() => {});
+  const sub = Notifications.addNotificationResponseReceivedListener(handle);
+  return () => sub.remove();
 }

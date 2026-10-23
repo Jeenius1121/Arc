@@ -30,7 +30,25 @@
     },
     "plugins": [
       "expo-notifications",
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "ArcEvents",
+              "label": "ARC Events",
+              "description": "Prochains événements suivis",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ]
   }
 }

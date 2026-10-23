@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { EventAlert } from '../core/alerts.ts';
-import { DEFAULT_FAVORITES, type Favorites } from '../core/favorites.ts';
+import { migrateFavorites, type Favorites } from '../core/favorites.ts';
 import type { RegionId } from '../core/parsers.ts';
 import type { FilterPreset } from '../core/types.ts';
 import type { FetchResult } from './sources.ts';
@@ -43,5 +43,5 @@ export const loadAutoUpdate = () => load<boolean>(AUTO_UPDATE_KEY, true);
 export const saveAutoUpdate = (v: boolean) => save(AUTO_UPDATE_KEY, v);
 
 const FAVORITES_KEY = 'arc.favorites.v1';
-export const loadFavorites = () => load<Favorites>(FAVORITES_KEY, DEFAULT_FAVORITES);
+export const loadFavorites = async (): Promise<Favorites> => migrateFavorites(await load<unknown>(FAVORITES_KEY, null));
 export const saveFavorites = (f: Favorites) => save(FAVORITES_KEY, f);

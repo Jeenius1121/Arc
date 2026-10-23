@@ -11,7 +11,11 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 - Filtres combinables (bouton **Filtres**) : catégories (Nuit, Orage / météo, Butin bonus, ARC majeur), cartes, événements exacts, « masquer les événements en cours ». Dans un même groupe les choix s'additionnent, entre groupes ils se combinent : « Orage » + « Champ de bataille du barrage » = les orages sur cette carte.
 - **Filtres enregistrés** : donne un nom au filtre dans la fenêtre Filtres → il apparaît en haut de l'écran. Appui long pour le supprimer.
 - **Notifications** : la cloche 🔔 sur un événement à venir permet de cocher un ou plusieurs rappels (au début, 5/15/30 min, 1 h ou 2 h avant, à la fin). Sur un événement en cours, la cloche prévient quand il se termine.
-- **Favoris** : le cœur ❤ sur un événement suit ce type d'événement sur toutes les cartes ; une notification arrive à chaque occurrence (au début ou avant, réglable dans ⚙). Le planning est rechargé en arrière-plan toutes les ~2 h tant qu'il y a des favoris.
+- **Favoris** : le cœur ❤ suit un type d'événement, sur toutes les cartes ou seulement certaines (re-toucher le cœur pour choisir). Une notification arrive à chaque occurrence (au début ou avant, réglable dans ⚙), sauf pendant les **heures calmes**.
+- **Vue « Cartes · maintenant »** : pour chaque carte, l'événement en cours et le suivant.
+- **Fiche détail** (toucher un événement) : icône officielle, type (majeure/mineure), effets en français, prochaines occurrences, cloche et cœur. Toucher une notification ouvre directement cette fiche.
+- Liste groupée (En cours, Dans l'heure, Aujourd'hui, Demain, Plus tard), badge ✨ Rare pour les événements qui reviennent au plus 2 fois dans le planning, alerte si les données ont plus d'une heure.
+- **Widget Android** « ARC Events » : prochains favoris (ou prochains événements) sur l'écran d'accueil. Le planning est rechargé en arrière-plan toutes les ~2 h pour le widget et les favoris.
 - Cache hors ligne, actualisation toutes les 15 min ou en tirant la liste vers le bas.
 
 ## Installer sur Android sans ordinateur
@@ -39,6 +43,8 @@ npm run typecheck
 - `src/core/parsers.ts` : lecture du planning officiel (données `liveEntries` de la page Next.js) et de MetaForge.
 - `src/core/names.ts` : noms français.
 - `src/core/filter.ts` : filtrage, tri, comptes à rebours.
+- `src/core/favorites.ts`, `src/core/insights.ts`, `src/core/conditionInfo.ts` (+ `conditionIcons.json`, icônes extraites du site officiel) : favoris, vue par carte, groupes, rareté, fiches.
+- `src/widget/` : widget Android (react-native-android-widget).
 - `scripts/check-sources.ts` : vérifie les vraies sources (lancé par GitHub Actions, workflow *Check data sources*).
 
 ## Limites connues

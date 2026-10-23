@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.ts';
-import { favoriteTriggers } from '../src/core/favorites.ts';
+import { DEFAULT_FAVORITES, favoriteTriggers, inQuietHours, migrateFavorites } from '../src/core/favorites.ts';
+import { groupByMoment, mapsNow, rareConditions } from '../src/core/insights.ts';
 import { applyFilter, countdown } from '../src/core/filter.ts';
 import { conditionName, mapName } from '../src/core/names.ts';
 import { parseMetaforge, parseOfficial } from '../src/core/parsers.ts';
@@ -140,11 +141,56 @@ test('favorite triggers cover every upcoming occurrence except belled ones', () 
     ev('d', 'Raid nocturne', 3),
     ev('e', 'Tempête électromagnétique', -0.5), // already running
   ];
-  const fav = { conditions: ['Tempête électromagnétique'], minutesBefore: [0, 15] };
+  const fav = { ...DEFAULT_FAVORITES, rules: [{ condition: 'Tempête électromagnétique', maps: [] }], minutesBefore: [0, 15] };
   const triggers = favoriteTriggers(events, fav, NOW, new Set(['c']));
   assert.deepEqual(
     triggers.map((t) => t.id),
     ['fav:a|0', 'fav:a|15', 'fav:b|0', 'fav:b|15'],
   );
-  assert.deepEqual(favoriteTriggers(events, { conditions: [], minutesBefore: [0] }, NOW, new Set()), []);
+  assert.deepEqual(favoriteTriggers(events, DEFAULT_FAVORITES, NOW, new Set()), []);
+});
+
+test('favorites can be limited to some maps and muted during quiet hours', () => {
+  const ev = (id: string, map: string, startH: number) => ({ id, map, condition: 'Ouragan', start: NOW + startH * H, end: NOW + (startH + 1) * H });
+  const events = [ev('a', 'Portail bleu', 1), ev('b', 'Port spatial', 2), ev('c', 'Portail bleu', 5)];
+  const onlyBlueGate = { ...DEFAULT_FAVORITES, rules: [{ condition: 'Ouragan', maps: ['Portail bleu'] }] };
+  assert.deepEqual(favoriteTriggers(events, onlyBlueGate, NOW, new Set()).map((t) => t.eventId), ['a', 'c']);
+
+  // Quiet hours covering event c's local start hour only.
+  const h = new Date(NOW + 5 * H).getHours();
+  const quiet = { ...onlyBlueGate, quiet: { enabled: true, start: h, end: (h + 1) % 24 } };
+  assert.deepEqual(favoriteTriggers(events, quiet, NOW, new Set()).map((t) => t.eventId), ['a']);
+  assert.equal(inQuietHours(Date.UTC(2026, 0, 1, 0, 0), { enabled: false, start: 0, end: 23 }), false);
+});
+
+test('favorites saved by older versions are migrated', () => {
+  const fav = migrateFavorites({ conditions: ['Raid nocturne'], minutesBefore: [15] });
+  assert.deepEqual(fav.rules, [{ condition: 'Raid nocturne', maps: [] }]);
+  assert.deepEqual(fav.minutesBefore, [15]);
+  assert.equal(fav.quiet.enabled, false);
+  assert.deepEqual(migrateFavorites(null), DEFAULT_FAVORITES);
+});
+
+test('map view, moment groups and rarity', () => {
+  const ev = (id: string, map: string, condition: string, startH: number) => ({ id, map, condition, start: NOW + startH * H, end: NOW + (startH + 1) * H });
+  const events = [
+    ev('a', 'Stella Montis', 'Raid nocturne', -0.5),
+    ev('b', 'Stella Montis', 'Raid nocturne', 1.5),
+    ev('c', 'Port spatial', 'Matriarche', 0.5),
+    ev('d', 'Port spatial', 'Raid nocturne', 30),
+  ];
+  const maps = mapsNow(events, NOW);
+  assert.deepEqual(
+    maps.map((m) => [m.map, m.current.map((e) => e.id), m.next?.id]),
+    [
+      ['Port spatial', [], 'c'],
+      ['Stella Montis', ['a'], 'b'],
+    ],
+  );
+  const groups = groupByMoment(events, NOW);
+  assert.equal(groups[0].title, 'En cours');
+  assert.deepEqual(groups[0].data.map((e) => e.id), ['a']);
+  assert.equal(groups[1].title, 'Dans l’heure');
+  assert.deepEqual(groups.at(-1)!.data.map((e) => e.id), ['d']);
+  assert.deepEqual([...rareConditions(events)], ['Matriarche']);
 });
