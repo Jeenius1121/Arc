@@ -39,7 +39,10 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon
 
-      - run: echo "{\"buildNumber\": $BUILD_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > version.json
+      - name: Write version.json
+        run: |
+          echo "{\"buildNumber\": $BUILD_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > version.json
+          cat version.json
 
       # Published as a GitHub release so the APK can be downloaded and
       # installed straight from a phone browser (no zip to extract).
