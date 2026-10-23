@@ -6,7 +6,17 @@ import { duration } from '../core/filter.ts';
 import { fold, type GameData } from '../core/gamedata.ts';
 import type { PlannedSlot } from '../core/planner.ts';
 import type { EventOccurrence } from '../core/types.ts';
-import { completeGoal, goalStep, hasGoal, shoppingList, toggleGoal, type Goal, type Progress } from '../core/progress.ts';
+import {
+  completeGoal,
+  goalStep,
+  hasGoal,
+  markCurrentQuest,
+  questAncestors,
+  shoppingList,
+  toggleGoal,
+  type Goal,
+  type Progress,
+} from '../core/progress.ts';
 import { CheckRow, Chip, ItemImage, Stepper } from './common.tsx';
 import { colors, ui } from './theme.ts';
 
@@ -152,10 +162,21 @@ function GoalPicker(props: {
   const { data, progress, onProgress } = props;
   const [tab, setTab] = useState<'quest' | 'bench' | 'project'>('quest');
   const [query, setQuery] = useState('');
+  const [hideDone, setHideDone] = useState(true);
   const quests = useMemo(() => {
     const q = fold(query.trim());
-    return data.quests.filter((x) => !q || fold(x.name).includes(q) || fold(x.trader).includes(q));
-  }, [data, query]);
+    return data.quests.filter(
+      (x) => (!hideDone || !progress.doneQuests.includes(x.id)) && (!q || fold(x.name).includes(q) || fold(x.trader).includes(q)),
+    );
+  }, [data, query, hideDone, progress.doneQuests]);
+
+  const markCurrent = (id: string, name: string) => {
+    const before = progress.doneQuests.length;
+    const next = markCurrentQuest(data, progress, id);
+    onProgress(next);
+    const added = next.doneQuests.length - before;
+    Alert.alert('C’est noté', `« ${name} » est suivie${added > 0 ? ` et les ${added} quêtes qui la précèdent sont marquées comme faites` : ''}.`);
+  };
 
   const toggleDone = (id: string) =>
     onProgress({
@@ -179,7 +200,14 @@ function GoalPicker(props: {
             {tab === 'quest' && (
               <>
                 <TextInput value={query} onChangeText={setQuery} placeholder="Chercher une quête ou un marchand" placeholderTextColor={colors.muted} style={[ui.input, { flex: 0 }]} />
-                <Text style={ui.muted}>Coche « Suivre » pour l’ajouter à ta liste de courses, ou « Faite » pour les quêtes déjà terminées.</Text>
+                <View style={[ui.box, { borderColor: colors.accent }]}>
+                  <Text style={[ui.text, { fontWeight: '700' }]}>📍 Le plus rapide</Text>
+                  <Text style={ui.text}>
+                    Ouvre ton journal de quêtes en jeu et, pour chaque quête en cours, touche « J’en suis là » ici : toutes les quêtes d’avant dans sa chaîne sont
+                    cochées comme faites automatiquement.
+                  </Text>
+                </View>
+                <CheckRow label={`Masquer les quêtes faites (${progress.doneQuests.length})`} checked={hideDone} onPress={() => setHideDone((v) => !v)} />
                 {quests.map((q) => {
                   const done = progress.doneQuests.includes(q.id);
                   const followed = hasGoal(progress, { kind: 'quest', id: q.id });
@@ -193,9 +221,11 @@ function GoalPicker(props: {
                         {q.maps.length ? ` · ${q.maps.join(', ')}` : ''}
                         {q.req.length ? ` · ${q.req.map((r) => `${data.items[r.id]?.name ?? r.id} ×${r.n}`).join(', ')}` : ''}
                       </Text>
-                      <View style={ui.row}>
+                      <View style={[ui.row, { flexWrap: 'wrap' }]}>
+                        <Pressable onPress={() => markCurrent(q.id, q.name)} style={[ui.button, { paddingVertical: 6 }]}>
+                          <Text style={[ui.buttonText, { fontSize: 13 }]}>📍 J’en suis là{questAncestors(data, q.id).size ? ` (+${questAncestors(data, q.id).size} faites)` : ''}</Text>
+                        </Pressable>
                         <CheckRow label="Suivre" checked={followed} disabled={done} onPress={() => onProgress(toggleGoal(progress, { kind: 'quest', id: q.id }))} />
-                        <View style={{ width: 16 }} />
                         <CheckRow label="Faite" checked={done} onPress={() => toggleDone(q.id)} />
                       </View>
                     </View>

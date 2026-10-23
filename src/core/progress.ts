@@ -202,3 +202,29 @@ function isUseDone(p: Progress, u: ItemUse): boolean {
 export function droppedBy(data: GameData, id: string) {
   return data.bots.filter((b) => b.drops.includes(id));
 }
+
+/** Every quest that must have been completed before `id` (the whole chain behind it). */
+export function questAncestors(data: GameData, id: string): Set<string> {
+  const byId = new Map(data.quests.map((q) => [q.id, q]));
+  const out = new Set<string>();
+  const stack = [...(byId.get(id)?.prev ?? [])];
+  while (stack.length) {
+    const q = stack.pop()!;
+    if (out.has(q)) continue;
+    out.add(q);
+    stack.push(...(byId.get(q)?.prev ?? []));
+  }
+  return out;
+}
+
+/**
+ * "I am at this quest": the game only lists active quests, so everything
+ * before it in its chain is marked done and the quest itself is followed.
+ */
+export function markCurrentQuest(data: GameData, p: Progress, id: string): Progress {
+  const done = new Set([...p.doneQuests, ...questAncestors(data, id)]);
+  done.delete(id);
+  const goal: Goal = { kind: 'quest', id };
+  const goals = p.goals.filter((g) => g.kind !== 'quest' || !done.has(g.id));
+  return { ...p, doneQuests: [...done], goals: hasGoal({ ...p, goals }, goal) ? goals : [...goals, goal] };
+}

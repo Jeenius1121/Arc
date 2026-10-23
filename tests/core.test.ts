@@ -8,7 +8,7 @@ import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.t
 import { diffItems, searchItems, type GameData, type GameItem } from '../src/core/gamedata.ts';
 import { overall, statsBy } from '../src/core/journal.ts';
 import { matchScannedText } from '../src/core/scan.ts';
-import { completeGoal, droppedBy, EMPTY_PROGRESS, goalStep, shoppingList, verdict, type Progress } from '../src/core/progress.ts';
+import { completeGoal, droppedBy, EMPTY_PROGRESS, goalStep, markCurrentQuest, questAncestors, shoppingList, verdict, type Progress } from '../src/core/progress.ts';
 import { DEFAULT_FAVORITES, favoriteTriggers, inQuietHours, migrateFavorites } from '../src/core/favorites.ts';
 import { groupByMoment, mapsNow, rareConditions } from '../src/core/insights.ts';
 import { planSlots } from '../src/core/planner.ts';
@@ -322,4 +322,13 @@ test('scanner text matching, raid stats and data diffs', () => {
     { id: 'gear', name: 'Engrenage rouillé', changes: ['recette modifiée', 'valeur 2000 → 1500 ¢'] },
     { id: 'toaster', name: 'Grille-pain', changes: ['retiré du jeu'] },
   ]);
+});
+
+test('marking the current quest completes its whole chain', () => {
+  const q = (id: string, prev: string[]) => ({ id, name: id, trader: 'Shani', maps: [], desc: '', objectives: [], req: [], rewards: [], xp: 0, prev, next: [] });
+  const data = { items: {}, quests: [q('a', []), q('b', ['a']), q('c', ['b']), q('d', ['c', 'x']), q('x', []), q('other', [])] } as unknown as GameData;
+  assert.deepEqual([...questAncestors(data, 'd')].sort(), ['a', 'b', 'c', 'x']);
+  const p = markCurrentQuest(data, { ...EMPTY_PROGRESS, goals: [{ kind: 'quest', id: 'b' }] }, 'd');
+  assert.deepEqual([...p.doneQuests].sort(), ['a', 'b', 'c', 'x']);
+  assert.deepEqual(p.goals, [{ kind: 'quest', id: 'd' }]);
 });
