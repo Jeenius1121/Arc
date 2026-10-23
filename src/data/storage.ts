@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import type { RegionId } from '../core/parsers.ts';
 import type { FilterPreset } from '../core/types.ts';
-import type { FetchResult, Source } from './sources.ts';
+import type { FetchResult } from './sources.ts';
 
-const PRESETS_KEY = 'arc.presets.v1';
-const CACHE_KEY = 'arc.cache.v1';
-const SOURCES_KEY = 'arc.sources.v1';
+const PRESETS_KEY = 'arc.presets.v2';
+const CACHE_KEY = 'arc.cache.v2';
+const REGION_KEY = 'arc.region.v1';
 
 async function load<T>(key: string, fallback: T): Promise<T> {
   try {
@@ -28,5 +29,5 @@ export const loadPresets = () => load<FilterPreset[] | null>(PRESETS_KEY, null);
 export const savePresets = (p: FilterPreset[]) => save(PRESETS_KEY, p);
 export const loadCache = () => load<FetchResult | null>(CACHE_KEY, null);
 export const saveCache = (r: FetchResult) => save(CACHE_KEY, r);
-export const loadSources = () => load<Source[] | null>(SOURCES_KEY, null);
-export const saveSources = (s: Source[]) => save(SOURCES_KEY, s);
+export const loadRegion = () => load<RegionId>(REGION_KEY, 'europe');
+export const saveRegion = (r: RegionId) => save(REGION_KEY, r);

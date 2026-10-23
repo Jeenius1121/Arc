@@ -1,70 +1,84 @@
 /// <reference types="node" />
-// Fixtures below are synthetic shapes used to exercise the parser; they are
-// not real ARC Raiders schedule data.
+// Fixtures reproduce the shape of arcraiders.com/map-conditions and
+// MetaForge's events-schedule as captured in October 2026.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { applyFilter, countdown } from '../src/core/filter.ts';
-import { extractPayloads } from '../src/core/html.ts';
-import { canonicalMap, normalize, parseTime } from '../src/core/normalize.ts';
+import { conditionName, mapName } from '../src/core/names.ts';
+import { parseMetaforge, parseOfficial } from '../src/core/parsers.ts';
 import { EMPTY_FILTER } from '../src/core/types.ts';
 
 const H = 3600_000;
-const NOW = Date.UTC(2026, 9, 23, 12, 30); // 12:30 UTC
+const NOW = 1792710000000;
 
-test('parseTime handles epoch, ISO and daily HH:MM', () => {
-  assert.deepEqual(parseTime(1_700_000_000), { kind: 'absolute', ms: 1_700_000_000_000 });
-  assert.deepEqual(parseTime('2026-10-23T14:00:00Z'), { kind: 'absolute', ms: Date.UTC(2026, 9, 23, 14) });
-  assert.deepEqual(parseTime('14:00'), { kind: 'daily', minutesUtc: 840 });
-  assert.equal(parseTime('hello'), null);
-});
+const liveEntries = [
+  {
+    conditionName: 'Night Raid',
+    mapDisplayName: 'Stella Montis',
+    durationInSeconds: 3600,
+    startTimestamp: NOW,
+    endTimestamp: NOW + H,
+    regionTimestamps: { 'north-america': [NOW + 7 * H, NOW + 8 * H], oceania: [NOW - 9 * H, NOW - 8 * H] },
+  },
+  {
+    conditionName: 'Redirection',
+    mapDisplayName: 'Pendola Pass',
+    durationInSeconds: 3600,
+    startTimestamp: NOW,
+    endTimestamp: NOW + H,
+    regionTimestamps: { 'north-america': [NOW + 7 * H, NOW + 8 * H] },
+  },
+];
 
-test('canonicalMap merges aliases', () => {
-  assert.equal(canonicalMap('dam_battlegrounds'), 'Dam Battlegrounds');
-  assert.equal(canonicalMap('Champ de bataille du barrage'), 'Dam Battlegrounds');
-  assert.equal(canonicalMap('blue-gate'), 'The Blue Gate');
-});
+/** The RSC payload is split across several push() calls, mid-JSON. */
+function officialHtml(): string {
+  const flight = `5:["$","$L14",null,{"conditionItems":[{"name":"Night Raid","type":"major"}],"liveEntries":${JSON.stringify(liveEntries)},"lookAheadMs":86400000}]\n`;
+  const cut = Math.floor(flight.length / 2);
+  return [flight.slice(0, cut), flight.slice(cut)]
+    .map((part) => `<script>self.__next_f.push([1,${JSON.stringify(part)}])</script>`)
+    .join('\n');
+}
 
-test('normalize flat absolute records', () => {
-  const events = normalize(
-    { data: [{ map: 'Spaceport', condition: 'Night Raid', startTime: NOW + H, endTime: NOW + 2 * H }] },
-    NOW,
-  );
-  assert.equal(events.length, 1);
-  assert.equal(events[0].map, 'Spaceport');
-  assert.equal(events[0].condition, 'Night Raid');
-});
-
-test('normalize map groups with nested daily times', () => {
-  const events = normalize(
-    [{ name: 'Buried City', events: [{ name: 'Electromagnetic Storm', times: [{ start: '13:00', end: '14:00' }] }] }],
-    NOW,
-  );
-  assert.ok(events.length >= 2, 'daily time expanded over several days');
-  const next = events.find((e) => e.start > NOW)!;
-  assert.equal(next.map, 'Buried City');
-  assert.equal(next.condition, 'Electromagnetic Storm');
-  assert.equal(next.start, Date.UTC(2026, 9, 23, 13));
-  assert.equal(next.end - next.start, H);
-});
-
-test('normalize event-first shape with map field and string list', () => {
-  const events = normalize({ events: [{ name: 'Harvester', map: { name: 'Dam' }, times: ['18:00'] }] }, NOW);
-  const today = events.find((e) => e.start === Date.UTC(2026, 9, 23, 18));
-  assert.ok(today);
-  assert.equal(today!.map, 'Dam Battlegrounds');
-});
-
-test('extractPayloads reads __NEXT_DATA__ and hour tables', () => {
-  const html = `
-    <script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"conditions":[{"map":"Stella Montis","condition":"Night Raid","start":"2026-10-23T15:00:00Z"}]}}}</script>
-    <table><tr><th>Map</th><th>13:00</th><th>14:00</th></tr>
-    <tr><td>Spaceport</td><td>Hurricane</td><td>-</td></tr></table>`;
-  const events = normalize(extractPayloads(html), NOW);
+test('parseOfficial reads Europe (base) timestamps across split chunks', () => {
+  const events = parseOfficial(officialHtml(), 'europe');
   assert.deepEqual(
-    events.filter((e) => e.start > NOW && e.start < NOW + 3 * H).map((e) => `${e.map}/${e.condition}`),
-    ['Spaceport/Hurricane', 'Stella Montis/Night Raid'],
+    events.map((e) => [e.map, e.condition, e.start]),
+    [
+      ['Col de Pendola', 'Redirection', NOW],
+      ['Stella Montis', 'Raid nocturne', NOW],
+    ],
   );
+});
+
+test('parseOfficial uses regionTimestamps for other regions', () => {
+  const na = parseOfficial(officialHtml(), 'north-america');
+  assert.equal(na.length, 2);
+  assert.ok(na.every((e) => e.start === NOW + 7 * H));
+  const oce = parseOfficial(officialHtml(), 'oceania');
+  assert.deepEqual(oce.map((e) => e.condition), ['Raid nocturne']);
+});
+
+test('parseOfficial fails clearly when the schedule is missing', () => {
+  assert.throws(() => parseOfficial('<html></html>', 'europe'), /planning introuvable/);
+});
+
+test('parseMetaforge reads events-schedule', () => {
+  const events = parseMetaforge({
+    data: [{ name: 'Matriarch', map: 'Dam', icon: 'x', startTime: NOW + H, endTime: NOW + 2 * H }],
+    region: 'europe',
+  });
+  assert.deepEqual(events.map((e) => [e.map, e.condition]), [['Champ de bataille du barrage', 'Matriarche']]);
+});
+
+test('French names for maps and conditions', () => {
+  assert.equal(mapName('The Blue Gate'), 'Portail bleu');
+  assert.equal(mapName('Blue Gate'), 'Portail bleu');
+  assert.equal(mapName('Buried City'), 'Ville enfouie');
+  assert.equal(mapName('Spaceport'), 'Port spatial');
+  assert.equal(conditionName('Electromagnetic Storm'), 'Tempête électromagnétique');
+  assert.equal(conditionName('Launch Tower Loot'), 'Butin de la tour de lancement');
+  assert.equal(conditionName('Some New Event'), 'Some New Event');
 });
 
 test('applyFilter combines criteria and sorts soonest first', () => {
@@ -75,21 +89,22 @@ test('applyFilter combines criteria and sorts soonest first', () => {
     start: NOW + startH * H,
     end: NOW + (startH + 1) * H,
   });
+  const dam = 'Champ de bataille du barrage';
   const events = [
-    ev('Dam Battlegrounds', 'Night Raid', 5),
-    ev('Spaceport', 'Night Raid', 2),
-    ev('Dam Battlegrounds', 'Electromagnetic Storm', 1),
-    ev('Dam Battlegrounds', 'Launch Tower Loot', 3),
-    ev('Spaceport', 'Night Raid', -3), // finished
+    ev(dam, 'Raid nocturne', 5),
+    ev('Port spatial', 'Raid nocturne', 2),
+    ev(dam, 'Tempête électromagnétique', 1),
+    ev(dam, 'Butin de la tour de lancement', 3),
+    ev('Port spatial', 'Raid nocturne', -3), // finished
   ];
   const night = applyFilter(events, { ...EMPTY_FILTER, categories: ['night'] }, NOW);
-  assert.deepEqual(night.map((e) => e.map), ['Spaceport', 'Dam Battlegrounds']);
+  assert.deepEqual(night.map((e) => e.map), ['Port spatial', dam]);
 
-  const stormDam = applyFilter(events, { ...EMPTY_FILTER, categories: ['weather'], maps: ['Dam Battlegrounds'] }, NOW);
-  assert.deepEqual(stormDam.map((e) => e.condition), ['Electromagnetic Storm']);
+  const stormDam = applyFilter(events, { ...EMPTY_FILTER, categories: ['weather'], maps: [dam] }, NOW);
+  assert.deepEqual(stormDam.map((e) => e.condition), ['Tempête électromagnétique']);
 
-  const lootDam = applyFilter(events, { ...EMPTY_FILTER, categories: ['loot'], maps: ['Dam Battlegrounds'] }, NOW);
-  assert.deepEqual(lootDam.map((e) => e.condition), ['Launch Tower Loot']);
+  const lootDam = applyFilter(events, { ...EMPTY_FILTER, categories: ['loot'], maps: [dam] }, NOW);
+  assert.deepEqual(lootDam.map((e) => e.condition), ['Butin de la tour de lancement']);
 });
 
 test('countdown text', () => {

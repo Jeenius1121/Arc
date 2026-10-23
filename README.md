@@ -4,17 +4,17 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 
 ## Fonctionnalités
 
-- Récupère le planning depuis le site officiel (`https://arcraiders.com/map-conditions`). Si la page ne contient aucune donnée exploitable, l'app passe à une source communautaire (MetaForge). Tu peux modifier les URL dans ⚙.
-- Compte à rebours en direct pour chaque événement. Un événement en cours est encadré en vert et affiche « fin dans … ».
-- La liste va toujours de l'événement le plus proche au plus lointain.
-- Filtres combinables :
-  - **Catégories** : Nuit, Orage / météo, Butin bonus, ARC majeur. Elles sont déduites du nom de l'événement.
-  - **Cartes** : Dam Battlegrounds (Champ de bataille du barrage), Buried City, Spaceport, The Blue Gate, Stella Montis…
-  - **Événements** : chaque condition exacte trouvée dans les données.
-  - Option « masquer les événements en cours ».
-- Dans un même groupe, plusieurs choix s'additionnent (OU). Entre les groupes, ils se combinent (ET). Par exemple, « Orage » + « Dam Battlegrounds » n'affiche que les orages sur cette carte.
-- **Filtres enregistrés** : configure un filtre, donne-lui un nom (« Orage Barrage »), puis appuie sur *Enregistrer*. Il apparaît dans la barre du haut. Un appui long dessus le supprime. Nuit, Orage / météo et Butin bonus sont fournis par défaut.
-- Les dernières données sont mises en cache pour l'usage hors ligne. Elles sont actualisées toutes les 15 min, ou quand tu tires la liste vers le bas.
+- Planning lu sur le site officiel (`https://arcraiders.com/map-conditions`), pour la **région de serveur** choisie dans ⚙ (Europe par défaut, Amérique du Nord, Brésil, Asie de l'Est, Océanie). En Europe, MetaForge sert de secours si le site officiel ne répond pas.
+- Noms des cartes et des événements en français (`src/core/names.ts`).
+- Compte à rebours en direct ; un événement en cours est encadré en vert (« fin dans … »).
+- Liste triée du plus proche au plus lointain.
+- Filtres combinables (bouton **Filtres**) : catégories (Nuit, Orage / météo, Butin bonus, ARC majeur), cartes, événements exacts, « masquer les événements en cours ». Dans un même groupe les choix s'additionnent, entre groupes ils se combinent : « Orage » + « Champ de bataille du barrage » = les orages sur cette carte.
+- **Filtres enregistrés** : donne un nom au filtre dans la fenêtre Filtres → il apparaît en haut de l'écran. Appui long pour le supprimer.
+- Cache hors ligne, actualisation toutes les 15 min ou en tirant la liste vers le bas.
+
+## Installer sur Android sans ordinateur
+
+À chaque mise à jour du code, GitHub compile l'APK et le publie sur la page *Releases* → `apk-latest` (`app-release.apk`). Ouvre-la connecté à ton compte GitHub (le dépôt est privé).
 
 ## Lancer l'app
 
@@ -32,11 +32,12 @@ npm test              # tests du parsing et des filtres (node:test)
 npm run typecheck
 ```
 
-- `src/core/normalize.ts` lit n'importe quel JSON et en extrait les événements (carte, condition, début, fin). Il accepte des horodatages, des dates ISO ou des heures quotidiennes `HH:MM`. Ces dernières sont interprétées en UTC et répétées sur 48 h.
-- `src/core/html.ts` extrait d'une page web les données `__NEXT_DATA__`, les `<script type="application/json">`, les flux React Server Components et les tableaux HTML.
-- `src/core/filter.ts` contient le filtrage, le tri et le formatage des comptes à rebours.
-- `src/data/sources.ts` liste les sources et l'ordre de repli.
+- `src/core/parsers.ts` : lecture du planning officiel (données `liveEntries` de la page Next.js) et de MetaForge.
+- `src/core/names.ts` : noms français.
+- `src/core/filter.ts` : filtrage, tri, comptes à rebours.
+- `scripts/check-sources.ts` : vérifie les vraies sources (lancé par GitHub Actions, workflow *Check data sources*).
 
 ## Limites connues
 
-Le format de la page officielle n'est pas documenté. Le parseur a été écrit pour être tolérant, mais **il n'a pas pu être testé contre la vraie page**, car elle n'était pas accessible depuis l'environnement de développement. Si l'app affiche « aucun événement trouvé », il faudra ajuster `normalize.ts` ou `html.ts` au format réel. Même chose si les heures sont décalées : les heures `HH:MM` sont supposées en UTC.
+- Le site officiel n'est pas une API documentée : si Embark change la page, le workflow *Check data sources* échouera et `parsers.ts` devra être adapté.
+- Quelques noms français n'ont pas pu être confirmés (voir les commentaires de `names.ts`).

@@ -1,7 +1,7 @@
 /**
- * Broad categories inferred from condition names, so the user can ask for
- * "every loot event" without knowing every condition name. Keywords cover
- * both English (official site) and French spellings.
+ * Broad categories inferred from condition names (French names, with the
+ * English ones as fallback), so the user can ask for "every loot event"
+ * without knowing every condition name.
  */
 export interface Category {
   id: string;
@@ -10,21 +10,21 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'night', label: 'Nuit', pattern: /night|nuit|nocturne/i },
+  { id: 'night', label: 'Nuit', pattern: /nocturne|nuit|night/i },
   {
     id: 'weather',
     label: 'Orage / météo',
-    pattern: /storm|tempête|tempete|orage|hurricane|ouragan|cold snap|froid|rain|pluie|blizzard|fog|brouillard/i,
+    pattern: /tempête|orage|ouragan|vague de froid|storm|hurricane|cold snap/i,
   },
   {
     id: 'loot',
     label: 'Butin bonus',
-    pattern: /loot|butin|cache|x2|×2|double|bunker|bloom|floraison|probe|sonde|supply|ravitaillement/i,
+    pattern: /butin|caches?|bunker|récoltes|épaves|oiseaux|sondes|redirection|loot|bloom|graveyard|bird city|probe|beachcombing/i,
   },
   {
     id: 'boss',
     label: 'ARC majeur',
-    pattern: /harvester|matriarch|queen|reine|moissonneu|boss/i,
+    pattern: /matriarche|récolteur|frégate|matriarch|harvester|frigate/i,
   },
 ];
 

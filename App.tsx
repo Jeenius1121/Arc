@@ -18,9 +18,10 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { CATEGORIES, categoriesOf } from './src/core/categories.ts';
 import { applyFilter, countdown, distinct, toggle } from './src/core/filter.ts';
+import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
-import { DEFAULT_SOURCES, fetchEvents, type FetchResult, type Source } from './src/data/sources.ts';
-import { loadCache, loadPresets, loadSources, saveCache, savePresets, saveSources } from './src/data/storage.ts';
+import { fetchEvents, type FetchResult } from './src/data/sources.ts';
+import { loadCache, loadPresets, loadRegion, saveCache, savePresets, saveRegion } from './src/data/storage.ts';
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
 
@@ -55,21 +56,20 @@ function Main() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [presets, setPresets] = useState<FilterPreset[]>(DEFAULT_PRESETS);
-  const [sources, setSources] = useState<Source[]>(DEFAULT_SOURCES);
+  const [region, setRegion] = useState<RegionId | null>(null);
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [presetName, setPresetName] = useState('');
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const refresh = useCallback(async (list: Source[]) => {
+  const refresh = useCallback(async (r: RegionId) => {
     setLoading(true);
-    const { result, errors } = await fetchEvents(list);
+    const { result, errors } = await fetchEvents(r);
     setErrors(errors);
     if (result) {
       setData(result);
@@ -80,19 +80,19 @@ function Main() {
 
   useEffect(() => {
     (async () => {
-      const [cached, storedPresets, storedSources] = await Promise.all([loadCache(), loadPresets(), loadSources()]);
-      if (cached) setData(cached);
+      const [cached, storedPresets, storedRegion] = await Promise.all([loadCache(), loadPresets(), loadRegion()]);
+      if (cached && cached.region === storedRegion) setData(cached);
       if (storedPresets) setPresets(storedPresets);
-      const list = storedSources ?? DEFAULT_SOURCES;
-      setSources(list);
-      refresh(list);
+      setRegion(storedRegion);
     })();
-  }, [refresh]);
+  }, []);
 
   useEffect(() => {
-    const t = setInterval(() => refresh(sources), AUTO_REFRESH_MS);
+    if (!region) return;
+    refresh(region);
+    const t = setInterval(() => refresh(region), AUTO_REFRESH_MS);
     return () => clearInterval(t);
-  }, [refresh, sources]);
+  }, [refresh, region]);
 
   const events = data?.events ?? [];
   const maps = useMemo(() => distinct(events, 'map'), [events]);
@@ -109,14 +109,11 @@ function Main() {
     setFilter((f) => ({ ...f, ...patch }));
   };
 
-  const savePreset = () => {
-    const name = presetName.trim();
-    if (!name) return;
+  const savePreset = (name: string) => {
     const preset: FilterPreset = { id: `${Date.now()}`, name, ...filter };
     const next = [...presets, preset];
     setPresets(next);
     savePresets(next);
-    setPresetName('');
     setActivePreset(preset.id);
   };
 
@@ -136,7 +133,15 @@ function Main() {
     ]);
   };
 
+  const changeRegion = (r: RegionId) => {
+    setRegion(r);
+    saveRegion(r);
+    setData(null);
+  };
+
   const filterCount = filter.maps.length + filter.conditions.length + filter.categories.length + (filter.upcomingOnly ? 1 : 0);
+  const regionLabel = REGIONS.find((r) => r.id === region)?.label ?? '';
+  const time = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
@@ -145,80 +150,36 @@ function Main() {
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>ARC Raiders · Événements</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
-            {data
-              ? `${data.source.label} · maj ${new Date(data.fetchedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
-              : loading
-                ? 'Chargement…'
-                : 'Aucune donnée'}
+            {data ? `${regionLabel} · ${data.source} · maj ${time(data.fetchedAt)}` : loading ? 'Chargement…' : 'Aucune donnée'}
           </Text>
         </View>
-        <Pressable onPress={() => setShowSettings(true)} style={styles.iconButton} accessibilityLabel="Sources">
+        <Pressable onPress={() => setShowSettings(true)} style={styles.iconButton} accessibilityLabel="Réglages">
           <Text style={styles.iconText}>⚙</Text>
         </Pressable>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetBar} contentContainerStyle={styles.chipRow}>
-        <Chip label="Tous" active={activePreset === null && filterCount === 0} onPress={() => selectPreset(null)} />
-        {presets.map((p) => (
-          <Chip key={p.id} label={p.name} active={activePreset === p.id} onPress={() => selectPreset(p)} onLongPress={() => deletePreset(p)} />
-        ))}
-        <Chip label={showFilters ? 'Fermer ▲' : `Filtres${filterCount ? ` (${filterCount})` : ''} ▼`} outline onPress={() => setShowFilters((s) => !s)} />
-      </ScrollView>
-
-      {showFilters && (
-        <ScrollView style={styles.filters} contentContainerStyle={{ paddingBottom: 12 }}>
-          <Section title="Catégories">
-            {CATEGORIES.map((c) => (
-              <Chip key={c.id} label={c.label} active={filter.categories.includes(c.id)} onPress={() => editFilter({ categories: toggle(filter.categories, c.id) })} />
-            ))}
-          </Section>
-          <Section title="Cartes">
-            {maps.map((m) => (
-              <Chip key={m} label={m} active={filter.maps.includes(m)} onPress={() => editFilter({ maps: toggle(filter.maps, m) })} />
-            ))}
-          </Section>
-          <Section title="Événements">
-            {conditions.map((c) => (
-              <Chip key={c} label={c} active={filter.conditions.includes(c)} onPress={() => editFilter({ conditions: toggle(filter.conditions, c) })} />
-            ))}
-          </Section>
-          <View style={styles.switchRow}>
-            <Text style={styles.text}>Masquer les événements en cours</Text>
-            <Switch value={filter.upcomingOnly} onValueChange={(v) => editFilter({ upcomingOnly: v })} />
-          </View>
-          <View style={styles.saveRow}>
-            <TextInput
-              value={presetName}
-              onChangeText={setPresetName}
-              placeholder="Nom du filtre (ex. Orage Barrage)"
-              placeholderTextColor={colors.muted}
-              style={styles.input}
-              onSubmitEditing={savePreset}
-            />
-            <Pressable onPress={savePreset} style={[styles.button, !presetName.trim() && { opacity: 0.4 }]}>
-              <Text style={styles.buttonText}>Enregistrer</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.hint}>Appui long sur un filtre enregistré pour le supprimer.</Text>
-        </ScrollView>
-      )}
-
-      {errors.length > 0 && !data && (
-        <View style={styles.errorBox}>
-          {errors.map((e) => (
-            <Text key={e} style={styles.errorText}>
-              {e}
-            </Text>
+      <View style={styles.presetBar}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+          <Chip label="Tous" active={activePreset === null && filterCount === 0} onPress={() => selectPreset(null)} />
+          {presets.map((p) => (
+            <Chip key={p.id} label={p.name} active={activePreset === p.id} onPress={() => selectPreset(p)} onLongPress={() => deletePreset(p)} />
           ))}
-        </View>
-      )}
+        </ScrollView>
+        <Pressable onPress={() => setShowFilters(true)} style={styles.filterButton}>
+          <Text style={styles.filterButtonText}>Filtres{filterCount ? ` (${filterCount})` : ''}</Text>
+        </Pressable>
+      </View>
+
+      {errors.length > 0 && !data && <ErrorBox errors={errors} />}
 
       <FlatList
         data={visible}
         keyExtractor={(e) => e.id}
         renderItem={({ item }) => <EventCard event={item} now={now} />}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => refresh(sources)} tintColor={colors.accent} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => {
+              if (region) refresh(region);
+            }} tintColor={colors.accent} />}
         ListEmptyComponent={
           loading ? (
             <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
@@ -228,17 +189,25 @@ function Main() {
         }
       />
 
+      <FiltersModal
+        visible={showFilters}
+        filter={filter}
+        maps={maps}
+        conditions={conditions}
+        resultCount={visible.length}
+        onChange={editFilter}
+        onReset={() => selectPreset(null)}
+        onSave={savePreset}
+        onClose={() => setShowFilters(false)}
+      />
+
       <SettingsModal
         visible={showSettings}
-        sources={sources}
+        region={region}
+        data={data}
         errors={errors}
+        onRegion={changeRegion}
         onClose={() => setShowSettings(false)}
-        onSave={(list) => {
-          setSources(list);
-          saveSources(list);
-          setShowSettings(false);
-          refresh(list);
-        }}
       />
     </SafeAreaView>
   );
@@ -267,72 +236,151 @@ function EventCard({ event, now }: { event: EventOccurrence; now: number }) {
   );
 }
 
-function SettingsModal(props: {
+function FiltersModal(props: {
   visible: boolean;
-  sources: Source[];
-  errors: string[];
+  filter: FilterState;
+  maps: string[];
+  conditions: string[];
+  resultCount: number;
+  onChange: (patch: Partial<FilterState>) => void;
+  onReset: () => void;
+  onSave: (name: string) => void;
   onClose: () => void;
-  onSave: (s: Source[]) => void;
 }) {
-  const [draft, setDraft] = useState(props.sources);
-  useEffect(() => setDraft(props.sources), [props.sources, props.visible]);
-  const update = (i: number, url: string) => setDraft((d) => d.map((s, j) => (j === i ? { ...s, url } : s)));
+  const { filter, onChange } = props;
+  const [name, setName] = useState('');
+  const save = () => {
+    const n = name.trim();
+    if (!n) return;
+    props.onSave(n);
+    setName('');
+    props.onClose();
+  };
 
   return (
     <Modal visible={props.visible} animationType="slide" onRequestClose={props.onClose}>
-      <SafeAreaView style={styles.root}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <Text style={styles.title}>Sources des données</Text>
-          <Text style={styles.hint}>Essayées dans l'ordre ; la première qui renvoie des événements est utilisée.</Text>
-          {draft.map((s, i) => (
-            <View key={s.id} style={{ marginTop: 16 }}>
-              <Text style={styles.sectionTitle}>{s.label}</Text>
-              <TextInput value={s.url} onChangeText={(u) => update(i, u)} autoCapitalize="none" autoCorrect={false} style={styles.input} />
-            </View>
-          ))}
-          {props.errors.length > 0 && (
-            <View style={[styles.errorBox, { marginHorizontal: 0 }]}>
-              {props.errors.map((e) => (
-                <Text key={e} style={styles.errorText}>
-                  {e}
-                </Text>
-              ))}
-            </View>
-          )}
-          <View style={[styles.saveRow, { marginTop: 24 }]}>
-            <Pressable onPress={() => setDraft(DEFAULT_SOURCES)} style={[styles.button, styles.buttonGhost]}>
-              <Text style={[styles.buttonText, { color: colors.text }]}>Par défaut</Text>
-            </Pressable>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.root}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.title}>Filtres</Text>
             <View style={{ flex: 1 }} />
-            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonGhost]}>
-              <Text style={[styles.buttonText, { color: colors.text }]}>Annuler</Text>
-            </Pressable>
-            <Pressable onPress={() => props.onSave(draft)} style={styles.button}>
-              <Text style={styles.buttonText}>OK</Text>
+            <Pressable onPress={props.onReset} style={[styles.button, styles.buttonGhost]}>
+              <Text style={[styles.buttonText, { color: colors.text }]}>Tout effacer</Text>
             </Pressable>
           </View>
-        </ScrollView>
-      </SafeAreaView>
+
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+            <Section title="Catégories">
+              {CATEGORIES.map((c) => (
+                <Chip key={c.id} label={c.label} active={filter.categories.includes(c.id)} onPress={() => onChange({ categories: toggle(filter.categories, c.id) })} />
+              ))}
+            </Section>
+            <Section title="Cartes">
+              {props.maps.map((m) => (
+                <Chip key={m} label={m} active={filter.maps.includes(m)} onPress={() => onChange({ maps: toggle(filter.maps, m) })} />
+              ))}
+            </Section>
+            <Section title="Événements">
+              {props.conditions.map((c) => (
+                <Chip key={c} label={c} active={filter.conditions.includes(c)} onPress={() => onChange({ conditions: toggle(filter.conditions, c) })} />
+              ))}
+            </Section>
+            <View style={styles.switchRow}>
+              <Text style={[styles.text, { flex: 1 }]}>Masquer les événements déjà en cours</Text>
+              <Switch value={filter.upcomingOnly} onValueChange={(v) => onChange({ upcomingOnly: v })} />
+            </View>
+
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Enregistrer ce filtre</Text>
+            <View style={styles.saveRow}>
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                placeholder="Nom (ex. Orage Barrage)"
+                placeholderTextColor={colors.muted}
+                style={styles.input}
+                onSubmitEditing={save}
+              />
+              <Pressable onPress={save} style={[styles.button, !name.trim() && { opacity: 0.4 }]}>
+                <Text style={styles.buttonText}>Enregistrer</Text>
+              </Pressable>
+            </View>
+            <Text style={styles.hint}>Les filtres enregistrés apparaissent en haut de l’écran. Appui long dessus pour les supprimer.</Text>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonWide]}>
+              <Text style={styles.buttonText}>
+                Fermer · {props.resultCount} événement{props.resultCount > 1 ? 's' : ''}
+              </Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     </Modal>
+  );
+}
+
+function SettingsModal(props: {
+  visible: boolean;
+  region: RegionId | null;
+  data: FetchResult | null;
+  errors: string[];
+  onRegion: (r: RegionId) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={props.visible} animationType="slide" onRequestClose={props.onClose}>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.root}>
+          <ScrollView contentContainerStyle={{ paddingVertical: 16 }}>
+            <Text style={[styles.title, { paddingHorizontal: 16 }]}>Réglages</Text>
+            <Section title="Région du serveur">
+              {REGIONS.map((r) => (
+                <Chip key={r.id} label={r.label} active={props.region === r.id} onPress={() => props.onRegion(r.id)} />
+              ))}
+            </Section>
+            <Text style={styles.hint}>Les horaires des événements dépendent de la région de ton serveur.</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Source</Text>
+            <Text style={[styles.text, { paddingHorizontal: 16 }]}>
+              {props.data ? `${props.data.source} · ${props.data.events.length} événements` : 'Aucune donnée chargée'}
+            </Text>
+            {props.errors.length > 0 && <ErrorBox errors={props.errors} />}
+          </ScrollView>
+          <View style={styles.modalFooter}>
+            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonWide]}>
+              <Text style={styles.buttonText}>Fermer</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </Modal>
+  );
+}
+
+function ErrorBox({ errors }: { errors: string[] }) {
+  return (
+    <View style={styles.errorBox}>
+      {errors.map((e) => (
+        <Text key={e} style={styles.errorText}>
+          {e}
+        </Text>
+      ))}
+    </View>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View style={{ marginTop: 10 }}>
+    <View style={{ marginTop: 14 }}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <View style={[styles.chipRow, { flexWrap: 'wrap' }]}>{children}</View>
     </View>
   );
 }
 
-function Chip(props: { label: string; active?: boolean; outline?: boolean; onPress: () => void; onLongPress?: () => void }) {
+function Chip(props: { label: string; active?: boolean; onPress: () => void; onLongPress?: () => void }) {
   return (
-    <Pressable
-      onPress={props.onPress}
-      onLongPress={props.onLongPress}
-      style={[styles.chip, props.active && styles.chipActive, props.outline && styles.chipOutline]}
-    >
+    <Pressable onPress={props.onPress} onLongPress={props.onLongPress} style={[styles.chip, props.active && styles.chipActive]}>
       <Text style={[styles.chipText, props.active && styles.chipTextActive]}>{props.label}</Text>
     </Pressable>
   );
@@ -345,22 +393,25 @@ const styles = StyleSheet.create({
   subtitle: { color: colors.muted, fontSize: 12, marginTop: 2 },
   iconButton: { padding: 8 },
   iconText: { color: colors.text, fontSize: 22 },
-  presetBar: { flexGrow: 0 },
-  chipRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
+  presetBar: { flexDirection: 'row', alignItems: 'center', flexShrink: 0, borderBottomWidth: 1, borderColor: colors.border },
+  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  chipOutline: { backgroundColor: 'transparent' },
   chipText: { color: colors.text, fontSize: 14 },
   chipTextActive: { color: '#111', fontWeight: '600' },
-  filters: { maxHeight: 380, borderBottomWidth: 1, borderColor: colors.border },
-  sectionTitle: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 16, marginBottom: 2 },
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, marginTop: 8 },
-  saveRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, marginTop: 10 },
+  filterButton: { marginRight: 12, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, borderWidth: 1, borderColor: colors.accent },
+  filterButtonText: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.border },
+  modalFooter: { padding: 16, borderTopWidth: 1, borderColor: colors.border },
+  sectionTitle: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 16 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, marginTop: 16 },
+  saveRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, marginTop: 8 },
   input: { flex: 1, color: colors.text, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
-  button: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 9 },
+  button: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10, alignItems: 'center' },
+  buttonWide: { paddingVertical: 14 },
   buttonGhost: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
-  buttonText: { color: '#111', fontWeight: '600' },
-  hint: { color: colors.muted, fontSize: 12, paddingHorizontal: 16, marginTop: 6 },
+  buttonText: { color: '#111', fontWeight: '600', fontSize: 15 },
+  hint: { color: colors.muted, fontSize: 12, paddingHorizontal: 16, marginTop: 8 },
   text: { color: colors.text },
   list: { padding: 16, gap: 10 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 14 },

@@ -1,51 +1,40 @@
-import { extractPayloads } from '../core/html.ts';
-import { normalize } from '../core/normalize.ts';
+import { parseMetaforge, parseOfficial, type RegionId } from '../core/parsers.ts';
 import type { EventOccurrence } from '../core/types.ts';
-
-export interface Source {
-  id: string;
-  label: string;
-  url: string;
-  kind: 'html' | 'json';
-}
-
-/**
- * Tried in order; the first one that yields events wins. The official page
- * comes first. The community API is a fallback in case the official page is
- * fully rendered client-side and carries no data in its HTML.
- */
-export const DEFAULT_SOURCES: Source[] = [
-  { id: 'official', label: 'Site officiel (arcraiders.com)', url: 'https://arcraiders.com/map-conditions', kind: 'html' },
-  { id: 'metaforge', label: 'MetaForge (communautaire)', url: 'https://metaforge.app/api/arc-raiders/event-timers', kind: 'json' },
-];
 
 export interface FetchResult {
   events: EventOccurrence[];
-  source: Source;
+  source: string;
+  region: RegionId;
   fetchedAt: number;
 }
 
-export async function fetchFrom(source: Source, now = Date.now()): Promise<EventOccurrence[]> {
-  const res = await fetch(source.url, {
-    headers: { Accept: source.kind === 'json' ? 'application/json' : 'text/html,application/json' },
-  });
+const OFFICIAL_URL = 'https://arcraiders.com/map-conditions';
+const METAFORGE_URL = 'https://metaforge.app/api/arc-raiders/events-schedule';
+
+async function get(url: string): Promise<string> {
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  const trimmed = text.trimStart();
-  const payloads =
-    trimmed.startsWith('{') || trimmed.startsWith('[') ? [JSON.parse(trimmed)] : extractPayloads(text);
-  return normalize(payloads, now);
+  return res.text();
 }
 
-export async function fetchEvents(sources: Source[]): Promise<{ result: FetchResult | null; errors: string[] }> {
+/**
+ * The official tracker comes first. MetaForge is only a fallback, and only
+ * for Europe: its schedule is the European one.
+ */
+export async function fetchEvents(region: RegionId): Promise<{ result: FetchResult | null; errors: string[] }> {
   const errors: string[] = [];
-  for (const source of sources) {
+  const attempts: Array<[string, () => Promise<EventOccurrence[]>]> = [
+    ['Site officiel', async () => parseOfficial(await get(OFFICIAL_URL), region)],
+  ];
+  if (region === 'europe') attempts.push(['MetaForge', async () => parseMetaforge(JSON.parse(await get(METAFORGE_URL)))]);
+
+  for (const [source, load] of attempts) {
     try {
-      const events = await fetchFrom(source);
-      if (events.length > 0) return { result: { events, source, fetchedAt: Date.now() }, errors };
-      errors.push(`${source.label} : aucun événement trouvé dans la page`);
+      const events = await load();
+      if (events.length > 0) return { result: { events, source, region, fetchedAt: Date.now() }, errors };
+      errors.push(`${source} : aucun événement trouvé`);
     } catch (e) {
-      errors.push(`${source.label} : ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`${source} : ${e instanceof Error ? e.message : String(e)}`);
     }
   }
   return { result: null, errors };
