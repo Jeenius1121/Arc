@@ -3,6 +3,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { RARITY_COLOR, RARITY_FR, type GameData } from '../core/gamedata.ts';
+import { baseMaterials, buyPrice, craftableTimes, craftCost, hasSubRecipes } from '../core/crafting.ts';
 import { droppedBy, recycleValue, shoppingList, usesOf, verdict, type Progress, type Verdict } from '../core/progress.ts';
 import { ItemImage, Stepper } from './common.tsx';
 import { colors, ui } from './theme.ts';
@@ -119,6 +120,15 @@ export function ItemDetail(props: {
                 {Object.entries(item.recipe).map(([rid, n]) => (
                   <ItemLink key={rid} itemId={rid} n={n} />
                 ))}
+                <CraftSummary data={data} itemId={item.id} owned={progress.owned} />
+                {hasSubRecipes(data, item) && (
+                  <>
+                    <Text style={ui.sectionTitleFlush}>Matériaux de base au total</Text>
+                    {Object.entries(baseMaterials(data, item.id, item.craftQty ?? 1)).map(([rid, n]) => (
+                      <ItemLink key={rid} itemId={rid} n={Math.ceil(n)} />
+                    ))}
+                  </>
+                )}
               </>
             )}
 
@@ -167,6 +177,26 @@ export function ItemDetail(props: {
         </SafeAreaView>
       </SafeAreaProvider>
     </Modal>
+  );
+}
+
+/** Craft or buy: component value vs trader price, and how many the set-aside stock allows. */
+function CraftSummary({ data, itemId, owned }: { data: GameData; itemId: string; owned: Record<string, number> }) {
+  const item = data.items[itemId];
+  const cost = craftCost(data, item);
+  const price = buyPrice(item);
+  const times = craftableTimes(item, owned);
+  return (
+    <View style={[ui.box, { marginTop: 4 }]}>
+      <Text style={ui.text}>Coût en composants : {cost.toLocaleString('fr-FR')} ¢ l’unité</Text>
+      {price !== undefined && (
+        <Text style={ui.text}>
+          Prix chez un marchand : {price.toLocaleString('fr-FR')} ¢ →{' '}
+          <Text style={{ color: colors.accent, fontWeight: '700' }}>{cost < price ? 'mieux vaut le fabriquer' : 'mieux vaut l’acheter'}</Text>
+        </Text>
+      )}
+      {times > 0 && <Text style={{ color: colors.live }}>Tu peux le fabriquer {times}× avec tes objets mis de côté.</Text>}
+    </View>
   );
 }
 

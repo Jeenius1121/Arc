@@ -82,6 +82,8 @@ export interface GameData {
   version: string;
   generatedAt: string;
   items: Record<string, GameItem>;
+  /** Map overviews (images from arctracker.io). */
+  maps?: Array<{ id: string; name: string; img: string }>;
   quests: Quest[];
   benches: Bench[];
   projects: Project[];
@@ -128,4 +130,31 @@ export function searchItems(data: GameData, query: string, limit = 60): GameItem
     .sort((a, b) => a[0] - b[0] || a[1].name.localeCompare(b[1].name))
     .slice(0, limit)
     .map(([, it]) => it);
+}
+
+export interface ItemChange {
+  id: string;
+  name: string;
+  changes: string[];
+}
+
+/** What changed for the given items between two data versions (recipe, recycling, value, removal). */
+export function diffItems(before: GameData, after: GameData, ids: string[]): ItemChange[] {
+  const out: ItemChange[] = [];
+  const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  for (const id of new Set(ids)) {
+    const a = before.items[id];
+    const b = after.items[id];
+    if (!a) continue;
+    const changes: string[] = [];
+    if (!b) changes.push('retiré du jeu');
+    else {
+      if (!same(a.recipe, b.recipe)) changes.push('recette modifiée');
+      if (!same(a.recycles, b.recycles)) changes.push('recyclage modifié');
+      if ((a.value ?? 0) !== (b.value ?? 0)) changes.push(`valeur ${a.value ?? 0} → ${b.value ?? 0} ¢`);
+      if (!a.phasedOut && b.phasedOut) changes.push('en voie de disparition');
+    }
+    if (changes.length) out.push({ id, name: (b ?? a).name, changes });
+  }
+  return out;
 }

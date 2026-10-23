@@ -18,6 +18,13 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 - **Widget Android** « ARC Events » : prochains favoris (ou prochains événements) sur l'écran d'accueil. Le planning est rechargé en arrière-plan toutes les ~2 h pour le widget et les favoris.
 - **Objets** (onglet 🔎) : recherche en français de tous les objets ; fiche avec verdict **Garder / Mettre de côté / Recycler / Vendre**, valeur, valeur par case, recyclage, démontage, recette, usages (quêtes, atelier, projets, fabrication, échanges), marchands, ARC qui le lâchent, zones de butin.
 - **Objectifs** (onglet 🎯) : suivre des quêtes, niveaux d'atelier et phases de projet ; l'app calcule la **liste de courses** totale et ce qu'il manque, avec les objets mis de côté.
+- **Planificateur** : en haut de l'onglet Objectifs, les meilleurs créneaux à venir pour ta liste de courses (ARC qui lâchent l'objet et sont plus fréquents pendant l'événement, plantes et Floraisons luxuriantes, épaves d'ARC et Cimetière d'épaves…), avec notification optionnelle (⚙ → 🎯).
+- **Bestiaire** (onglet 🤖) : chaque ARC avec menace, point faible, cartes, événements où il est plus fréquent (et prochaines occasions), butin.
+- **Fabrication** : matériaux de base au total, coût en composants contre prix marchand, nombre de fabrications possibles avec les objets mis de côté.
+- **Scanner** 📷 (onglet Objets) : photo de l'écran du jeu → reconnaissance de texte sur le téléphone (ML Kit) → fiche de l'objet.
+- **Journal** (onglet 📒) : chaque raid en deux appuis (carte, extrait/mort, valeur) ; taux d'extraction et rendement réel par carte et par événement.
+- **Escouade** : partager un événement (lien `arcevents://` qui ouvre la fiche) ou sa liste de courses.
+- **Fiches de quêtes** (objectifs, objets à livrer, récompenses, chaîne), **cartes** (vue Cartes → 🗺), alerte quand une mise à jour des données modifie un objet suivi.
 - Cache hors ligne, actualisation toutes les 15 min ou en tirant la liste vers le bas.
 
 ## Installer sur Android sans ordinateur

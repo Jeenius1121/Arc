@@ -178,10 +178,15 @@ const trades: GameData['trades'] = json('trades.json').map((t: any) => ({
   daily: t.dailyLimit ?? undefined,
 }));
 
+const mapImages: GameData['maps'] = json('maps.json')
+  .filter((m: any) => m.image)
+  .map((m: any) => ({ id: m.id, name: fr(m.name), img: m.image }));
+
 const data: GameData = {
   version: json('items.json').version ?? '',
   generatedAt: new Date().toISOString(),
   items,
+  maps: mapImages,
   quests: quests.sort((a, b) => a.trader.localeCompare(b.trader) || a.name.localeCompare(b.name)),
   benches: benchData,
   projects,

@@ -5,10 +5,14 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.ts';
-import { searchItems, type GameData, type GameItem } from '../src/core/gamedata.ts';
+import { diffItems, searchItems, type GameData, type GameItem } from '../src/core/gamedata.ts';
+import { overall, statsBy } from '../src/core/journal.ts';
+import { matchScannedText } from '../src/core/scan.ts';
 import { completeGoal, droppedBy, EMPTY_PROGRESS, goalStep, shoppingList, verdict, type Progress } from '../src/core/progress.ts';
 import { DEFAULT_FAVORITES, favoriteTriggers, inQuietHours, migrateFavorites } from '../src/core/favorites.ts';
 import { groupByMoment, mapsNow, rareConditions } from '../src/core/insights.ts';
+import { planSlots } from '../src/core/planner.ts';
+import { baseMaterials, buyPrice, craftableTimes, craftCost, hasSubRecipes } from '../src/core/crafting.ts';
 import { applyFilter, countdown } from '../src/core/filter.ts';
 import { conditionName, mapName } from '../src/core/names.ts';
 import { parseMetaforge, parseOfficial } from '../src/core/parsers.ts';
@@ -244,4 +248,78 @@ test('item search ignores case and accents', () => {
   const data = { items: { a: { id: 'a', name: 'Engrenage rouillé' }, b: { id: 'b', name: 'Énergie' } } } as unknown as GameData;
   assert.deepEqual(searchItems(data, 'ROUILLE').map((i) => i.id), ['a']);
   assert.deepEqual(searchItems(data, 'ener').map((i) => i.id), ['b']);
+});
+
+test('planner ranks events that help the shopping list', () => {
+  const item = (id: string, extra: Partial<GameItem> = {}): GameItem => ({ id, name: id, type: 'Recyclable', rarity: 'Common', stack: 1, ...extra });
+  const data = {
+    items: { plant: item('plant', { type: 'Nature' }), core: item('core'), junk: item('junk') },
+    bots: [{ id: 'b', name: 'Bastion', type: '', threat: '', desc: '', weakness: '', maps: [], drops: ['core'], xp: 0, moreDuring: [{ map: 'Ville Enfouie', events: ['Night Raid'] }] }],
+  } as unknown as GameData;
+  const ev = (id: string, map: string, condition: string, startH: number) => ({ id, map, condition, start: NOW + startH * H, end: NOW + (startH + 1) * H });
+  const events = [
+    ev('a', 'Ville enfouie', 'Raid nocturne', 2),
+    ev('b', 'Port spatial', 'Raid nocturne', 1),
+    ev('c', 'Champ de bataille du Barrage', 'Floraisons luxuriantes', 3),
+    ev('d', 'Portail bleu', 'Ouragan', 0.5),
+  ];
+  const missing = [
+    { id: 'plant', needed: 8, owned: 0, missing: 8, for: [] },
+    { id: 'core', needed: 2, owned: 0, missing: 2, for: [] },
+    { id: 'junk', needed: 1, owned: 1, missing: 0, for: [] },
+  ];
+  const slots = planSlots(data, missing, events, NOW);
+  assert.deepEqual(slots.map((s) => s.event.id), ['c', 'a']);
+  assert.match(slots[1].reasons[0].why, /Bastion/);
+});
+
+test('crafting expands sub-recipes and compares with trader prices', () => {
+  const item = (id: string, extra: Partial<GameItem> = {}): GameItem => ({ id, name: id, type: 'Divers', rarity: 'Common', stack: 1, ...extra });
+  const data = {
+    items: {
+      metal: item('metal', { value: 10 }),
+      spring: item('spring', { value: 40, recipe: { metal: 2 } }),
+      gun: item('gun', { value: 900, recipe: { spring: 3, metal: 4 }, vendors: [{ trader: 'Lance', cost: { coins: 500 } }] }),
+    },
+  } as unknown as GameData;
+  assert.deepEqual(baseMaterials(data, 'gun'), { metal: 10 });
+  assert.equal(hasSubRecipes(data, data.items.gun), true);
+  assert.equal(craftCost(data, data.items.gun), 160);
+  assert.equal(buyPrice(data.items.gun), 500);
+  assert.equal(craftableTimes(data.items.gun, { spring: 7, metal: 9 }), 2);
+});
+
+test('scanner text matching, raid stats and data diffs', () => {
+  const item = (id: string, name: string, extra: Partial<GameItem> = {}): GameItem => ({ id, name, type: 'Divers', rarity: 'Common', stack: 1, ...extra });
+  const data = {
+    items: {
+      gear: item('gear', 'Engrenage rouillé', { value: 2000 }),
+      cell: item('cell', 'Cellule d’énergie ARC'),
+      toaster: item('toaster', 'Grille-pain'),
+    },
+  } as unknown as GameData;
+  assert.deepEqual(matchScannedText(data, ['ENGRENAGE ROUILLE', 'Recyclable · 2 000']).map((i) => i.id), ['gear']);
+  assert.deepEqual(matchScannedText(data, ['Cellule d energie', 'x3']).map((i) => i.id), ['cell']);
+  assert.deepEqual(matchScannedText(data, ['Inventaire']), []);
+
+  const raids = [
+    { id: '1', at: 0, map: 'Port spatial', condition: 'Raid nocturne', outcome: 'extract' as const, value: 30000 },
+    { id: '2', at: 0, map: 'Port spatial', outcome: 'death' as const },
+    { id: '3', at: 0, map: 'Ville enfouie', outcome: 'extract' as const, value: 8000 },
+  ];
+  const all = overall(raids);
+  assert.equal(all.raids, 3);
+  assert.equal(Math.round(all.rate * 100), 67);
+  const byMap = statsBy(raids, 'map');
+  assert.deepEqual(byMap.map((s) => [s.key, s.yieldPerRaid]), [
+    ['Port spatial', 15000],
+    ['Ville enfouie', 8000],
+  ]);
+
+  const after = { items: { ...data.items, gear: { ...data.items.gear, value: 1500, recipe: { cell: 1 } } } } as unknown as GameData;
+  delete (after.items as Record<string, GameItem>).toaster;
+  assert.deepEqual(diffItems(data, after, ['gear', 'toaster', 'cell']), [
+    { id: 'gear', name: 'Engrenage rouillé', changes: ['recette modifiée', 'valeur 2000 → 1500 ¢'] },
+    { id: 'toaster', name: 'Grille-pain', changes: ['retiré du jeu'] },
+  ]);
 });

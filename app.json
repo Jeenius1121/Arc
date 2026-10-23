@@ -57,7 +57,16 @@
             "enableShrinkResourcesInReleaseBuilds": false
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "ARC Events utilise l’appareil photo pour reconnaître les objets affichés à l’écran du jeu.",
+          "photosPermission": false,
+          "microphonePermission": false
+        }
       ]
-    ]
+    ],
+    "scheme": "arcevents"
   }
 }

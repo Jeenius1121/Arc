@@ -18,12 +18,15 @@ export interface Favorites {
   rules: FavoriteRule[];
   minutesBefore: number[];
   quiet: QuietHours;
+  /** Notify when an upcoming event helps the shopping list (see planner.ts). */
+  smart: boolean;
 }
 
 export const DEFAULT_FAVORITES: Favorites = {
   rules: [],
   minutesBefore: [0],
   quiet: { enabled: false, start: 1, end: 8 },
+  smart: false,
 };
 
 export const FAVORITE_PREFIX = 'fav:';

@@ -4,11 +4,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
+  Linking,
   Modal,
   Pressable,
   RefreshControl,
   ScrollView,
   SectionList,
+  Share,
   StyleSheet,
   Switch,
   Text,
@@ -21,6 +24,7 @@ import { SvgXml } from 'react-native-svg';
 import { BEFORE_OPTIONS, alertSummary, optionAvailable, pruneAlerts, type EventAlert } from './src/core/alerts.ts';
 import { CATEGORIES, categoriesOf } from './src/core/categories.ts';
 import { conditionIcon, conditionInfo } from './src/core/conditionInfo.ts';
+import { mapName } from './src/core/names.ts';
 import { DEFAULT_FAVORITES, findRule, isFollowed, setRule, type FavoriteRule, type Favorites } from './src/core/favorites.ts';
 import { applyFilter, countdown, distinct, duration, toggle } from './src/core/filter.ts';
 import { groupByMoment, mapsNow, occurrencesOf, rareConditions } from './src/core/insights.ts';
@@ -39,6 +43,7 @@ import {
   scheduledCount,
   sendTestNotifications,
   syncFavorites,
+  syncPlanAlerts,
 } from './src/data/notifications.ts';
 import {
   loadAlerts,
@@ -56,20 +61,26 @@ import {
 } from './src/data/storage.ts';
 import { checkForUpdate, currentBuild, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
 import { refreshWidget } from './src/widget/update.tsx';
-import type { GameData } from './src/core/gamedata.ts';
-import { EMPTY_PROGRESS, type Progress } from './src/core/progress.ts';
+import { diffItems, type GameData } from './src/core/gamedata.ts';
+import { planSlots } from './src/core/planner.ts';
+import { EMPTY_PROGRESS, shoppingList, type Progress } from './src/core/progress.ts';
 import { bundledGameData, loadGameData, refreshGameData } from './src/data/gamedataStore.ts';
-import { loadProgress, saveProgress } from './src/data/storage.ts';
+import type { RaidEntry } from './src/core/journal.ts';
+import { loadJournal, loadProgress, saveJournal, saveProgress } from './src/data/storage.ts';
+import { JournalScreen } from './src/ui/JournalScreen.tsx';
+import { BestiaryScreen } from './src/ui/BestiaryScreen.tsx';
 import { GoalsScreen } from './src/ui/GoalsScreen.tsx';
 import { ItemDetail } from './src/ui/ItemDetail.tsx';
 import { ItemsScreen } from './src/ui/ItemsScreen.tsx';
 import { colors } from './src/ui/theme.ts';
 
-type MainTab = 'events' | 'items' | 'goals';
+type MainTab = 'events' | 'items' | 'goals' | 'arc' | 'journal';
 const MAIN_TABS: Array<[MainTab, string, string]> = [
   ['events', '🗓', 'Événements'],
   ['items', '🔎', 'Objets'],
   ['goals', '🎯', 'Objectifs'],
+  ['arc', '🤖', 'ARC'],
+  ['journal', '📒', 'Journal'],
 ];
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
@@ -115,6 +126,7 @@ function Main() {
   const [gameData, setGameData] = useState<GameData>(bundledGameData);
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [itemDetailId, setItemDetailId] = useState<string | null>(null);
+  const [journal, setJournal] = useState<RaidEntry[]>([]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -150,13 +162,42 @@ function Main() {
       if (auto) lookForUpdate(true);
       registerBackgroundRefresh();
       setProgress(await loadProgress());
+      setJournal(await loadJournal());
       const game = await loadGameData();
       setGameData(game);
       const fresh = await refreshGameData(game);
-      if (fresh) setGameData(fresh);
+      if (fresh) {
+        setGameData(fresh);
+        // Tell the player when items they collect for their goals changed.
+        const tracked = shoppingList(game, await loadProgress()).map((l) => l.id);
+        const changed = diffItems(game, fresh, tracked);
+        if (changed.length > 0) {
+          Alert.alert(
+            'Données du jeu mises à jour',
+            changed
+              .slice(0, 8)
+              .map((c) => `• ${c.name} : ${c.changes.join(', ')}`)
+              .join('\n'),
+          );
+        }
+      }
     })();
+    // Links shared by squad mates: arcevents://event/<id> or arcevents://item/<id>.
+    const openLink = (url?: string | null) => {
+      const m = url?.match(/^arcevents:\/\/(event|item)\/(.+)$/);
+      if (!m) return;
+      const id = decodeURIComponent(m[2]);
+      if (m[1] === 'event') setDetailId(id);
+      else setItemDetailId(id);
+    };
+    Linking.getInitialURL().then(openLink).catch(() => {});
+    const linkSub = Linking.addEventListener('url', ({ url }) => openLink(url));
     // A tap on one of our notifications opens that event's details.
-    return onNotificationOpened(setDetailId);
+    const unsubscribe = onNotificationOpened(setDetailId);
+    return () => {
+      linkSub.remove();
+      unsubscribe();
+    };
   }, []);
 
   const startUpdate = async (update: UpdateInfo) => {
@@ -209,6 +250,20 @@ function Main() {
   const rare = useMemo(() => rareConditions(events), [events]);
   const detailEvent = detailId ? events.find((e) => e.id === detailId) : undefined;
   const stale = data !== null && now - data.fetchedAt > STALE_MS;
+  const minute = Math.floor(now / 60_000);
+  const plan = useMemo(
+    () => planSlots(gameData, shoppingList(gameData, progress), events, minute * 60_000),
+    [gameData, progress, events, minute],
+  );
+
+  // Smart notifications: the best upcoming slots for the shopping list.
+  useEffect(() => {
+    if (!favoritesLoaded || events.length === 0) return;
+    (async () => {
+      if (favorites.smart && !(await ensureNotificationsReady())) return;
+      await syncPlanAlerts(plan, favorites, gameData).catch(() => {});
+    })();
+  }, [plan, favorites, favoritesLoaded]);
 
   // Keep favourite notifications in line with the latest schedule, bells and choices.
   useEffect(() => {
@@ -333,7 +388,33 @@ function Main() {
       </View>
 
       {mainTab === 'items' && <ItemsScreen data={gameData} progress={progress} onOpen={setItemDetailId} />}
-      {mainTab === 'goals' && <GoalsScreen data={gameData} progress={progress} onProgress={changeProgress} onOpenItem={setItemDetailId} />}
+      {mainTab === 'goals' && (
+        <GoalsScreen
+          data={gameData}
+          progress={progress}
+          plan={plan}
+          now={now}
+          onProgress={changeProgress}
+          onOpenItem={setItemDetailId}
+          onOpenEvent={(e) => setDetailId(e.id)}
+        />
+      )}
+
+      {mainTab === 'journal' && (
+        <JournalScreen
+          entries={journal}
+          events={events}
+          now={now}
+          onChange={(j) => {
+            setJournal(j);
+            saveJournal(j);
+          }}
+        />
+      )}
+
+      {mainTab === 'arc' && (
+        <BestiaryScreen data={gameData} events={events} now={now} onOpenItem={setItemDetailId} onOpenEvent={(e) => setDetailId(e.id)} />
+      )}
 
       {mainTab === 'events' && (
       <>
@@ -390,7 +471,7 @@ function Main() {
       )}
 
       {view === 'maps' ? (
-        <MapsView events={events} now={now} onOpen={(e) => setDetailId(e.id)} />
+        <MapsView events={events} now={now} maps={gameData.maps ?? []} onOpen={(e) => setDetailId(e.id)} />
       ) : (
         <SectionList
           sections={sections}
@@ -583,14 +664,29 @@ function ConditionIcon({ condition, size = 24, color = colors.accent }: { condit
 }
 
 /** One tile per map: what runs there now and what comes next. */
-function MapsView({ events, now, onOpen }: { events: EventOccurrence[]; now: number; onOpen: (e: EventOccurrence) => void }) {
+function MapsView(props: {
+  events: EventOccurrence[];
+  now: number;
+  maps: Array<{ name: string; img: string }>;
+  onOpen: (e: EventOccurrence) => void;
+}) {
+  const { events, now, onOpen } = props;
+  const [shown, setShown] = useState<{ title: string; imgs: string[] } | null>(null);
   const statuses = mapsNow(events, now);
   if (statuses.length === 0) return <Text style={styles.empty}>Aucune donnée chargée.</Text>;
+  const imagesOf = (map: string) => props.maps.filter((m) => mapName(m.name) === map).map((m) => m.img);
   return (
     <ScrollView contentContainerStyle={styles.list}>
       {statuses.map((s) => (
         <View key={s.map} style={styles.mapTile}>
-          <Text style={styles.mapTitle}>{s.map}</Text>
+          <View style={[styles.saveRow, { paddingHorizontal: 0, marginTop: 0, justifyContent: 'space-between' }]}>
+            <Text style={styles.mapTitle}>{s.map}</Text>
+            {imagesOf(s.map).length > 0 && (
+              <Pressable onPress={() => setShown({ title: s.map, imgs: imagesOf(s.map) })} hitSlop={8}>
+                <Text style={styles.cardMap}>🗺 Voir la carte</Text>
+              </Pressable>
+            )}
+          </View>
           {s.current.length === 0 ? (
             <Text style={styles.cardMeta}>Aucun événement en cours</Text>
           ) : (
@@ -611,6 +707,26 @@ function MapsView({ events, now, onOpen }: { events: EventOccurrence[]; now: num
           )}
         </View>
       ))}
+      {shown && (
+        <Modal visible animationType="slide" onRequestClose={() => setShown(null)}>
+          <SafeAreaProvider>
+            <SafeAreaView style={styles.root}>
+              <ScrollView contentContainerStyle={{ padding: 12, gap: 12 }} maximumZoomScale={4}>
+                <Text style={styles.title}>{shown.title}</Text>
+                {shown.imgs.map((img) => (
+                  <Image key={img} source={{ uri: img }} style={{ width: '100%', aspectRatio: 1 }} resizeMode="contain" />
+                ))}
+                <Text style={styles.hint}>Carte : arctracker.io</Text>
+              </ScrollView>
+              <View style={styles.modalFooter}>
+                <Pressable onPress={() => setShown(null)} style={[styles.button, styles.buttonWide]}>
+                  <Text style={styles.buttonText}>Fermer</Text>
+                </Pressable>
+              </View>
+            </SafeAreaView>
+          </SafeAreaProvider>
+        </Modal>
+      )}
     </ScrollView>
   );
 }
@@ -682,6 +798,10 @@ function EventDetail(props: {
               </Pressable>
             </View>
 
+            <Pressable onPress={() => shareEvent(event, now)} style={[styles.button, styles.buttonGhost]}>
+              <Text style={[styles.buttonText, { color: colors.text }]}>📣 Proposer à mon escouade</Text>
+            </Pressable>
+
             <Text style={[styles.sectionTitleFlush, { marginTop: 8 }]}>Prochaines fois</Text>
             {others.length === 0 ? (
               <Text style={styles.cardMeta}>Aucune autre occurrence dans le planning chargé (24 h).</Text>
@@ -703,6 +823,15 @@ function EventDetail(props: {
       </SafeAreaProvider>
     </Modal>
   );
+}
+
+/** Shares a ready-to-send squad message with a link that opens the event in the app. */
+function shareEvent(e: EventOccurrence, now: number) {
+  const at = new Date(e.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const when = e.start <= now ? 'en ce moment' : `à ${at} (dans ${duration(e.start - now)})`;
+  Share.share({
+    message: `🎯 ARC Raiders : ${e.condition} sur ${e.map} ${when}. On y va ?\narcevents://event/${encodeURIComponent(e.id)}`,
+  }).catch(() => {});
 }
 
 /** Maps where `condition` appears in the schedule (all maps when it is not scheduled right now). */
@@ -979,6 +1108,10 @@ function SettingsModal(props: {
               </>
             )}
 
+            <View style={styles.switchRow}>
+              <Text style={[styles.text, { flex: 1 }]}>🎯 Me prévenir des bons créneaux pour mes objectifs</Text>
+              <Switch value={fav.smart} onValueChange={(v) => props.onFavorites({ ...fav, smart: v })} />
+            </View>
             <View style={styles.switchRow}>
               <Text style={[styles.text, { flex: 1 }]}>Heures calmes (pas de notification de favori)</Text>
               <Switch value={fav.quiet.enabled} onValueChange={(v) => setQuiet({ enabled: v })} />

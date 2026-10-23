@@ -2,7 +2,9 @@ import * as Notifications from 'expo-notifications';
 import { Alert, Platform } from 'react-native';
 
 import { triggersFor, type EventAlert } from '../core/alerts.ts';
-import { FAVORITE_PREFIX, favoriteTriggers, type Favorites } from '../core/favorites.ts';
+import { FAVORITE_PREFIX, favoriteTriggers, inQuietHours, type Favorites } from '../core/favorites.ts';
+import type { GameData } from '../core/gamedata.ts';
+import type { PlannedSlot } from '../core/planner.ts';
 import type { EventOccurrence } from '../core/types.ts';
 
 const CHANNEL_ID = 'events';
@@ -93,7 +95,7 @@ export async function rescheduleAll(alerts: Record<string, EventAlert>): Promise
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
   await Promise.all(
     scheduled
-      .filter((n) => !n.identifier.startsWith(FAVORITE_PREFIX))
+      .filter((n) => !n.identifier.startsWith(FAVORITE_PREFIX) && !n.identifier.startsWith(PLAN_PREFIX))
       .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
   );
   const next: Record<string, EventAlert> = {};
@@ -117,6 +119,28 @@ export async function syncFavorites(events: EventOccurrence[], fav: Favorites, a
   await Promise.all(scheduled.filter((id) => !wantedIds.has(id)).map((id) => Notifications.cancelScheduledNotificationAsync(id)));
   for (const t of wanted) {
     if (!existing.has(t.id)) await schedule(t.at, `❤ ${t.title}`, t.body, t.eventId, t.id);
+  }
+}
+
+const PLAN_PREFIX = 'plan:';
+
+/**
+ * One notification at the start of each upcoming slot that helps the
+ * shopping list (top of planSlots), outside quiet hours; none when disabled.
+ */
+export async function syncPlanAlerts(slots: PlannedSlot[], fav: Favorites, data: GameData): Promise<void> {
+  const now = Date.now();
+  const wanted = fav.smart ? slots.filter((s) => s.event.start > now && !inQuietHours(s.event.start, fav.quiet)) : [];
+  const ids = new Map(wanted.map((s) => [`${PLAN_PREFIX}${s.event.id}`, s]));
+  const scheduled = (await Notifications.getAllScheduledNotificationsAsync()).map((n) => n.identifier).filter((id) => id.startsWith(PLAN_PREFIX));
+  await Promise.all(scheduled.filter((id) => !ids.has(id)).map((id) => Notifications.cancelScheduledNotificationAsync(id)));
+  for (const [id, s] of ids) {
+    if (scheduled.includes(id)) continue;
+    const items = s.reasons
+      .slice(0, 3)
+      .map((r) => data.items[r.itemId]?.name ?? r.itemId)
+      .join(', ');
+    await schedule(s.event.start, `🎯 ${s.event.condition} · ${s.event.map}`, `Bon créneau pour tes objectifs : ${items}.`, s.event.id, id);
   }
 }
 

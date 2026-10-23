@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { EventAlert } from '../core/alerts.ts';
 import { migrateFavorites, type Favorites } from '../core/favorites.ts';
+import type { RaidEntry } from '../core/journal.ts';
 import type { RegionId } from '../core/parsers.ts';
 import { migrateProgress, type Progress } from '../core/progress.ts';
 import type { FilterPreset } from '../core/types.ts';
@@ -50,3 +51,7 @@ export const saveFavorites = (f: Favorites) => save(FAVORITES_KEY, f);
 const PROGRESS_KEY = 'arc.progress.v1';
 export const loadProgress = async (): Promise<Progress> => migrateProgress(await load<unknown>(PROGRESS_KEY, null));
 export const saveProgress = (p: Progress) => save(PROGRESS_KEY, p);
+
+const JOURNAL_KEY = 'arc.journal.v1';
+export const loadJournal = () => load<RaidEntry[]>(JOURNAL_KEY, []);
+export const saveJournal = (j: RaidEntry[]) => save(JOURNAL_KEY, j);
