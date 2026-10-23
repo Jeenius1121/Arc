@@ -1,45 +1,35 @@
-name: Peek condition details
+name: Extract condition icons
 
 on:
   push:
     paths: ['.github/workflows/peek-conditions.yml']
 
+permissions:
+  contents: write
+
 jobs:
-  peek:
+  icons:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: |
           UA="Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36"
-          curl -sSL -m 60 -A "$UA" -o main.html https://arcraiders.com/map-conditions
-          curl -sSL -m 60 -A "$UA" -o at-fr.html https://arctracker.io/fr/map-events
-          for s in arc-frigate beachcombing bird-city close-scrutiny cold-snap electromagnetic-storm harvester hidden-bunker hurricane husk-graveyard launch-tower-loot locked-gate lush-blooms matriarch night-raid redirection uncovered-caches prospecting-probes; do
-            curl -sSL -m 60 -A "$UA" -o "c-$s.html" "https://arcraiders.com/map-conditions/$s" || true
-          done
+          curl -sSL -m 60 -A "$UA" -o /tmp/main.html https://arcraiders.com/map-conditions
           python3 - <<'PY'
-          import re, json, glob, html
-          main = open('main.html', encoding='utf-8').read()
+          import re, json
+          main = open('/tmp/main.html', encoding='utf-8').read()
           icons = {}
-          for m in re.finditer(r'href="/(?:fr/)?map-conditions/([a-z0-9-]+)"[^>]*>([\s\S]*?)</a>', main):
+          for m in re.finditer(r'href="/(?:[a-z-]+/)?map-conditions/([a-z0-9-]+)"[^>]*>([\s\S]*?)</a>', main):
               slug, inner = m.group(1), m.group(2)
               svg = re.search(r'<svg[\s\S]*?</svg>', inner)
-              if svg and slug not in icons and '/map/' not in slug:
-                  s = re.sub(r'\sclass="[^"]*"', '', svg.group(0))
+              if svg and slug not in icons:
+                  s = re.sub(r'\s(class|data-name)="[^"]*"', '', svg.group(0))
                   icons[slug] = s
-          print('ICONS', json.dumps(icons))
-          for f in sorted(glob.glob('c-*.html')):
-              t = open(f, encoding='utf-8').read()
-              body = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<svg[\s\S]*?</svg>', ' ', t)
-              i = body.find('<main')
-              body = body[i:] if i >= 0 else body
-              parts = [html.unescape(p).strip() for p in re.split(r'<[^>]+>', body)]
-              parts = [p for p in parts if 2 < len(p) < 600]
-              print('PAGE', f, json.dumps(parts[:60], ensure_ascii=False))
-          t = open('at-fr.html', encoding='utf-8').read()
-          flight = ''
-          for m in re.finditer(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)', t):
-              try: flight += json.loads(m.group(1))
-              except Exception: pass
-          for k in ('"descriptions"', 'nightRaidDesc', 'Raid nocturne', 'Tempête électromagnétique'):
-              for m in list(re.finditer(re.escape(k), flight))[:4]:
-                  print('AT', k, '>>', flight[max(0, m.start()-300): m.start()+700].replace('\n', ' '))
+          print(sorted(icons))
+          json.dump(icons, open('src/core/conditionIcons.json', 'w'), indent=1, sort_keys=True)
           PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/core/conditionIcons.json
+          git commit -m "Add official condition icons (extracted from arcraiders.com)"
+          git push
