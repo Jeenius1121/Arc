@@ -1,0 +1,47 @@
+import { StyleSheet } from 'react-native';
+
+export const colors = {
+  bg: '#0e1116',
+  card: '#181d25',
+  border: '#2a313c',
+  text: '#e8ecf1',
+  muted: '#8b95a3',
+  accent: '#f2c14e',
+  live: '#4ade80',
+  danger: '#f87171',
+};
+
+/** Styles shared by every screen. */
+export const ui = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  title: { color: colors.text, fontSize: 20, fontWeight: '700' },
+  text: { color: colors.text },
+  muted: { color: colors.muted, fontSize: 12 },
+  hint: { color: colors.muted, fontSize: 12, paddingHorizontal: 16, marginTop: 8 },
+  sectionTitle: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, paddingHorizontal: 16 },
+  sectionTitleFlush: { color: colors.muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 },
+  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
+  chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+  chipText: { color: colors.text, fontSize: 14 },
+  chipTextActive: { color: '#111', fontWeight: '600' },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 12 },
+  cardTitle: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  accentText: { color: colors.accent, fontSize: 14 },
+  box: { backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6 },
+  input: { flex: 1, color: colors.text, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
+  button: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10, alignItems: 'center' },
+  buttonGhost: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  buttonText: { color: '#111', fontWeight: '600', fontSize: 15 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.border },
+  modalFooter: { padding: 16, borderTopWidth: 1, borderColor: colors.border },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  checkbox: { width: 22, height: 22, borderRadius: 5, borderWidth: 2, borderColor: colors.muted, alignItems: 'center', justifyContent: 'center' },
+  checkboxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  checkMark: { color: '#111', fontSize: 14, fontWeight: '700' },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.card, borderRadius: 8, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 6, paddingVertical: 4 },
+  stepperButton: { paddingHorizontal: 8, paddingVertical: 2 },
+  empty: { color: colors.muted, textAlign: 'center', marginTop: 40, paddingHorizontal: 24 },
+  list: { padding: 16, gap: 10 },
+});

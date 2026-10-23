@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { EventAlert } from '../core/alerts.ts';
 import { migrateFavorites, type Favorites } from '../core/favorites.ts';
 import type { RegionId } from '../core/parsers.ts';
+import { migrateProgress, type Progress } from '../core/progress.ts';
 import type { FilterPreset } from '../core/types.ts';
 import type { FetchResult } from './sources.ts';
 
@@ -45,3 +46,7 @@ export const saveAutoUpdate = (v: boolean) => save(AUTO_UPDATE_KEY, v);
 const FAVORITES_KEY = 'arc.favorites.v1';
 export const loadFavorites = async (): Promise<Favorites> => migrateFavorites(await load<unknown>(FAVORITES_KEY, null));
 export const saveFavorites = (f: Favorites) => save(FAVORITES_KEY, f);
+
+const PROGRESS_KEY = 'arc.progress.v1';
+export const loadProgress = async (): Promise<Progress> => migrateProgress(await load<unknown>(PROGRESS_KEY, null));
+export const saveProgress = (p: Progress) => save(PROGRESS_KEY, p);

@@ -56,6 +56,21 @@ import {
 } from './src/data/storage.ts';
 import { checkForUpdate, currentBuild, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
 import { refreshWidget } from './src/widget/update.tsx';
+import type { GameData } from './src/core/gamedata.ts';
+import { EMPTY_PROGRESS, type Progress } from './src/core/progress.ts';
+import { bundledGameData, loadGameData, refreshGameData } from './src/data/gamedataStore.ts';
+import { loadProgress, saveProgress } from './src/data/storage.ts';
+import { GoalsScreen } from './src/ui/GoalsScreen.tsx';
+import { ItemDetail } from './src/ui/ItemDetail.tsx';
+import { ItemsScreen } from './src/ui/ItemsScreen.tsx';
+import { colors } from './src/ui/theme.ts';
+
+type MainTab = 'events' | 'items' | 'goals';
+const MAIN_TABS: Array<[MainTab, string, string]> = [
+  ['events', '🗓', 'Événements'],
+  ['items', '🔎', 'Objets'],
+  ['goals', '🎯', 'Objectifs'],
+];
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
 /** Past this age the schedule may be wrong (offline phone): warn the user. */
@@ -67,16 +82,6 @@ const DEFAULT_PRESETS: FilterPreset[] = [
   { id: 'loot', name: 'Butin bonus', maps: [], conditions: [], categories: ['loot'], upcomingOnly: false },
 ];
 
-const colors = {
-  bg: '#0e1116',
-  card: '#181d25',
-  border: '#2a313c',
-  text: '#e8ecf1',
-  muted: '#8b95a3',
-  accent: '#f2c14e',
-  live: '#4ade80',
-  danger: '#f87171',
-};
 
 export default function App() {
   return (
@@ -106,6 +111,10 @@ function Main() {
   const [view, setView] = useState<'list' | 'maps'>('list');
   const [detailId, setDetailId] = useState<string | null>(null);
   const [favoriteSheet, setFavoriteSheet] = useState<string | null>(null);
+  const [mainTab, setMainTab] = useState<MainTab>('events');
+  const [gameData, setGameData] = useState<GameData>(bundledGameData);
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
+  const [itemDetailId, setItemDetailId] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -140,6 +149,11 @@ function Main() {
       setAutoUpdate(auto);
       if (auto) lookForUpdate(true);
       registerBackgroundRefresh();
+      setProgress(await loadProgress());
+      const game = await loadGameData();
+      setGameData(game);
+      const fresh = await refreshGameData(game);
+      if (fresh) setGameData(fresh);
     })();
     // A tap on one of our notifications opens that event's details.
     return onNotificationOpened(setDetailId);
@@ -206,6 +220,11 @@ function Main() {
       await syncFavorites(events, favorites, alerts).catch(() => {});
     })();
   }, [events, favorites, alerts, favoritesLoaded]);
+
+  const changeProgress = (next: Progress) => {
+    setProgress(next);
+    saveProgress(next);
+  };
 
   const changeFavorites = (next: Favorites) => {
     setFavorites(next);
@@ -299,11 +318,11 @@ function Main() {
   const time = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.root} edges={['top', 'left', 'right', 'bottom']}>
       <StatusBar style="light" />
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>ARC Raiders · Événements</Text>
+          <Text style={styles.title}>ARC Raiders · {MAIN_TABS.find(([id]) => id === mainTab)?.[2]}</Text>
           <Text style={styles.subtitle} numberOfLines={1}>
             {data ? `${regionLabel} · ${data.source} · maj ${time(data.fetchedAt)}` : loading ? 'Chargement…' : 'Aucune donnée'}
           </Text>
@@ -313,6 +332,11 @@ function Main() {
         </Pressable>
       </View>
 
+      {mainTab === 'items' && <ItemsScreen data={gameData} progress={progress} onOpen={setItemDetailId} />}
+      {mainTab === 'goals' && <GoalsScreen data={gameData} progress={progress} onProgress={changeProgress} onOpenItem={setItemDetailId} />}
+
+      {mainTab === 'events' && (
+      <>
       <View style={styles.tabs}>
         {(
           [
@@ -404,6 +428,25 @@ function Main() {
           }
         />
       )}
+      </>
+      )}
+
+      <View style={styles.bottomBar}>
+        {MAIN_TABS.map(([id, icon, label]) => (
+          <Pressable key={id} onPress={() => setMainTab(id)} style={styles.bottomTab}>
+            <Text style={[styles.bottomIcon, mainTab !== id && { opacity: 0.5 }]}>{icon}</Text>
+            <Text style={[styles.bottomLabel, mainTab === id && { color: colors.accent }]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <ItemDetail
+        data={gameData}
+        progress={progress}
+        itemId={itemDetailId}
+        onOwned={(id, n) => changeProgress({ ...progress, owned: { ...progress.owned, [id]: n } })}
+        onClose={() => setItemDetailId(null)}
+      />
 
       <FiltersModal
         visible={showFilters}
@@ -1120,6 +1163,10 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, textAlign: 'center', marginTop: 40 },
   errorBox: { marginHorizontal: 16, marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: '#2a1618', borderWidth: 1, borderColor: colors.danger },
   errorText: { color: colors.danger, fontSize: 12 },
+  bottomBar: { flexDirection: 'row', borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.card },
+  bottomTab: { flex: 1, alignItems: 'center', paddingVertical: 8, gap: 2 },
+  bottomIcon: { fontSize: 18 },
+  bottomLabel: { color: colors.muted, fontSize: 11, fontWeight: '600' },
   tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 6, marginBottom: 2, borderRadius: 10, backgroundColor: colors.card, padding: 3 },
   tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
   tabActive: { backgroundColor: colors.accent },

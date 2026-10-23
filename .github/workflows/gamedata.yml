@@ -1,0 +1,27 @@
+name: Refresh game data
+
+# Publishes a fresh gamedata.json next to the APK every day; the app downloads
+# it, so items, quests and recipes stay current between app updates.
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          git clone --depth 1 https://github.com/fgrzesiak/arcraiders-data.git /tmp/arcdata
+          node scripts/build-gamedata.ts /tmp/arcdata
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          files: src/data/gamedata.json

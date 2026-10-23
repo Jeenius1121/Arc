@@ -32,6 +32,13 @@ jobs:
           java-version: 17
 
       - run: npm ci
+
+      # Freshest community game data (items, quests, workshop...) in the APK.
+      - name: Update game data
+        run: |
+          git clone --depth 1 https://github.com/fgrzesiak/arcraiders-data.git /tmp/arcdata
+          node scripts/build-gamedata.ts /tmp/arcdata
+
       - run: npm test
       - run: npx expo prebuild --platform android --no-install
 
@@ -83,4 +90,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-latest
-          files: version.json
+          files: |
+            version.json
+            src/data/gamedata.json

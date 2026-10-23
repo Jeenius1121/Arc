@@ -16,6 +16,8 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 - **Fiche détail** (toucher un événement) : icône officielle, type (majeure/mineure), effets en français, prochaines occurrences, cloche et cœur. Toucher une notification ouvre directement cette fiche.
 - Liste groupée (En cours, Dans l'heure, Aujourd'hui, Demain, Plus tard), badge ✨ Rare pour les événements qui reviennent au plus 2 fois dans le planning, alerte si les données ont plus d'une heure.
 - **Widget Android** « ARC Events » : prochains favoris (ou prochains événements) sur l'écran d'accueil. Le planning est rechargé en arrière-plan toutes les ~2 h pour le widget et les favoris.
+- **Objets** (onglet 🔎) : recherche en français de tous les objets ; fiche avec verdict **Garder / Mettre de côté / Recycler / Vendre**, valeur, valeur par case, recyclage, démontage, recette, usages (quêtes, atelier, projets, fabrication, échanges), marchands, ARC qui le lâchent, zones de butin.
+- **Objectifs** (onglet 🎯) : suivre des quêtes, niveaux d'atelier et phases de projet ; l'app calcule la **liste de courses** totale et ce qu'il manque, avec les objets mis de côté.
 - Cache hors ligne, actualisation toutes les 15 min ou en tirant la liste vers le bas.
 
 ## Installer sur Android sans ordinateur
@@ -46,6 +48,10 @@ npm run typecheck
 - `src/core/favorites.ts`, `src/core/insights.ts`, `src/core/conditionInfo.ts` (+ `conditionIcons.json`, icônes extraites du site officiel) : favoris, vue par carte, groupes, rareté, fiches.
 - `src/widget/` : widget Android (react-native-android-widget).
 - `scripts/check-sources.ts` : vérifie les vraies sources (lancé par GitHub Actions, workflow *Check data sources*).
+
+## Données de jeu
+
+Objets, quêtes, atelier, projets, ARC et échanges viennent du dépôt communautaire [arcraiders-data](https://github.com/fgrzesiak/arcraiders-data) (MIT, synchronisé depuis arctracker.io ; images servies par cdn.arctracker.io). `scripts/build-gamedata.ts` en tire `src/data/gamedata.json` (français uniquement), régénéré à chaque build et publié chaque jour sur la release `apk-latest` : l'app télécharge la version la plus récente.
 
 ## Limites connues
 

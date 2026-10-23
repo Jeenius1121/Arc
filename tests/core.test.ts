@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.ts';
+import { searchItems, type GameData, type GameItem } from '../src/core/gamedata.ts';
+import { completeGoal, droppedBy, EMPTY_PROGRESS, goalStep, shoppingList, verdict, type Progress } from '../src/core/progress.ts';
 import { DEFAULT_FAVORITES, favoriteTriggers, inQuietHours, migrateFavorites } from '../src/core/favorites.ts';
 import { groupByMoment, mapsNow, rareConditions } from '../src/core/insights.ts';
 import { applyFilter, countdown } from '../src/core/filter.ts';
@@ -193,4 +195,53 @@ test('map view, moment groups and rarity', () => {
   assert.equal(groups[1].title, 'Dans l’heure');
   assert.deepEqual(groups.at(-1)!.data.map((e) => e.id), ['d']);
   assert.deepEqual([...rareConditions(events)], ['Matriarche']);
+});
+
+test('goals add up to a shopping list and drive the keep/recycle/sell verdict', () => {
+  const item = (id: string, extra: Partial<GameItem> = {}): GameItem => ({ id, name: id, type: 'Recyclable', rarity: 'Common', stack: 1, ...extra });
+  const data: GameData = {
+    version: '1',
+    generatedAt: '2026-10-01T00:00:00Z',
+    items: {
+      gear: item('gear', { value: 100, recycles: { metal: 4 } }),
+      metal: item('metal', { value: 50, type: 'Matériau de base' }),
+      toaster: item('toaster', { value: 300, recycles: { metal: 1 } }),
+      book: item('book', { value: 10 }),
+    },
+    quests: [{ id: 'q1', name: 'Q1', trader: 'Shani', maps: [], desc: '', objectives: [], req: [{ id: 'book', n: 2 }], rewards: [], xp: 0, prev: [], next: ['q2'] }],
+    benches: [{ id: 'bench', name: 'Établi', levels: [{ level: 1, req: [{ id: 'gear', n: 3 }], other: [] }, { level: 2, req: [{ id: 'toaster', n: 1 }], other: [] }] }],
+    projects: [],
+    bots: [{ id: 'b', name: 'Guêpe', type: '', threat: '', desc: '', weakness: '', maps: [], drops: ['gear'], xp: 0, moreDuring: [] }],
+    trades: [],
+  };
+  let p: Progress = { ...EMPTY_PROGRESS, goals: [{ kind: 'bench', id: 'bench' }, { kind: 'quest', id: 'q1' }], owned: { gear: 1 } };
+  assert.deepEqual(
+    shoppingList(data, p).map((l) => [l.id, l.owned, l.needed, l.missing]),
+    [
+      ['book', 0, 2, 2],
+      ['gear', 1, 3, 2],
+    ],
+  );
+  assert.equal(verdict(data, p, data.items.gear).action, 'keep');
+  // Toaster is only needed for bench level 2, not followed yet.
+  assert.equal(verdict(data, p, data.items.toaster).action, 'later');
+  // Recycling the gear is worth 200 vs 100 once no goal needs it.
+  const free = { ...EMPTY_PROGRESS, benchLevels: { bench: 1 } };
+  assert.equal(verdict(data, free, data.items.gear).action, 'recycle');
+  assert.equal(verdict(data, free, data.items.metal).action, 'later');
+  assert.deepEqual(droppedBy(data, 'gear').map((b) => b.name), ['Guêpe']);
+
+  p = completeGoal(data, { ...p, owned: { gear: 3 } }, { kind: 'bench', id: 'bench' });
+  assert.equal(p.benchLevels.bench, 1);
+  assert.equal(p.owned.gear, 0);
+  assert.equal(goalStep(data, p, { kind: 'bench', id: 'bench' }).title, 'Établi niveau 2');
+  p = completeGoal(data, p, { kind: 'quest', id: 'q1' });
+  assert.deepEqual(p.doneQuests, ['q1']);
+  assert.ok(p.goals.some((g) => g.kind === 'quest' && g.id === 'q2'), 'follow-up quest is followed');
+});
+
+test('item search ignores case and accents', () => {
+  const data = { items: { a: { id: 'a', name: 'Engrenage rouillé' }, b: { id: 'b', name: 'Énergie' } } } as unknown as GameData;
+  assert.deepEqual(searchItems(data, 'ROUILLE').map((i) => i.id), ['a']);
+  assert.deepEqual(searchItems(data, 'ener').map((i) => i.id), ['b']);
 });
