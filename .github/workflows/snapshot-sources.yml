@@ -33,6 +33,28 @@ jobs:
             echo "=== MetaForge ?region=$r"
             curl -sS -m 30 -A "$UA" "https://metaforge.app/api/arc-raiders/event-timers?region=$r" | jq -c '{region, count: (.data|length), first: .data[0:2]}' 2>&1 | head -c 1500; echo
           done
+          for c in "NEXT_LOCALE=fr" "locale=fr"; do
+            curl -sS -m 30 -A "$UA" -H "Cookie: $c" -H "Accept-Language: fr-FR" -o "official-cookie-$c.html" https://arcraiders.com/fr/map-conditions || true
+            echo "=== cookie $c: $(wc -c < "official-cookie-$c.html") bytes"
+            grep -oE 'conditionName__[a-zA-Z0-9]+">[^<]+' "official-cookie-$c.html" | sort -u | head -20
+          done
+          echo "=== Official liveEntries + region strings"
+          python3 - official.html <<'PY'
+          import json, re, sys
+          html = open(sys.argv[1], encoding='utf-8').read()
+          flight = ''.join(json.loads(m.group(1)) for m in re.finditer(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)', html))
+          i = flight.index('"liveEntries":') + len('"liveEntries":')
+          entries, _ = json.JSONDecoder().raw_decode(flight[i:])
+          print('entries', len(entries))
+          print(json.dumps(entries[:2]))
+          print(sorted({e['mapDisplayName'] for e in entries}))
+          print(sorted({e['conditionName'] for e in entries}))
+          for m in re.finditer(r'(?i)europe|north-america|regionOptions|"regions"', flight):
+              print('...', flight[max(0, m.start() - 200): m.start() + 300].replace('\n', ' '))
+              break
+          for m in list(re.finditer(r'(?i)europe', flight))[:3]:
+              print('EU>', flight[max(0, m.start() - 300): m.start() + 300].replace('\n', ' '))
+          PY
           echo "=== Official RSC payload around the conditions"
           python3 - official-fr.html <<'PY'
           import json, re, sys
