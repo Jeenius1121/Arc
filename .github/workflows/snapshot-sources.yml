@@ -23,6 +23,20 @@ jobs:
           fetch official-fr.html https://arcraiders.com/fr/map-conditions
           date -u > fetched-at.txt
           ls -la
+      - name: Print sources
+        working-directory: out
+        run: |
+          for f in *.headers; do echo "=== $f"; grep -iE '^HTTP|content-type|location' "$f"; done
+          for f in metaforge-event-timers.json metaforge-events-schedule.json; do
+            echo "=== $f"; (jq . "$f" 2>/dev/null || cat "$f") | head -c 60000; echo
+          done
+          for f in official.html official-fr.html metaforge-page.html; do
+            echo "=== $f ($(wc -c < "$f") bytes)"
+            grep -oE '<title>[^<]*</title>' "$f" | head -1
+            grep -oE '"[^"]{0,40}(Night|Nocturne|nocturne|Pendola|Redirect|Storm|Tempête|condition|Condition)[^"]{0,80}"' "$f" | sort -u | head -80
+            grep -oE '(src|href)="[^"]*(\.json|/api/)[^"]*"' "$f" | sort -u | head -20
+            grep -oE 'https?://[a-zA-Z0-9./_-]*(api|json|graphql)[a-zA-Z0-9./_?=-]*' "$f" | sort -u | head -30
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: sources
