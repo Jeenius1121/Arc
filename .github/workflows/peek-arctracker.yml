@@ -1,0 +1,35 @@
+name: Peek arctracker names
+
+on:
+  push:
+    paths: ['.github/workflows/peek-arctracker.yml']
+
+jobs:
+  peek:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36"
+          for l in fr en; do
+            curl -sSL -m 60 -A "$UA" -H "Accept-Language: $l" -o "$l.html" "https://arctracker.io/$l/map-events" || true
+            echo "=== $l $(wc -c < $l.html) bytes"
+          done
+          python3 - <<'PY'
+          import re, html, json
+          for l in ('fr', 'en'):
+              t = open(f'{l}.html', encoding='utf-8', errors='replace').read()
+              print('=====', l, re.findall(r'<title>([^<]*)', t)[:1])
+              body = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>', ' ', t)
+              words = [html.unescape(s).strip() for s in re.split(r'<[^>]+>', body)]
+              seen = []
+              for w in words:
+                  if 2 < len(w) < 60 and w not in seen: seen.append(w)
+              print(json.dumps(seen[:400], ensure_ascii=False))
+              flight = ''
+              for m in re.finditer(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)', t):
+                  try: flight += json.loads(m.group(1))
+                  except Exception: pass
+              for k in ('Night Raid', 'Raid', 'Riven', 'Beachcombing', 'Close Scrutiny', 'Frigate', 'Lush', 'Uncovered', 'Pendola'):
+                  for m in list(re.finditer(k, flight))[:3]:
+                      print(l, k, '>>', flight[max(0, m.start()-150): m.start()+150].replace('\n', ' '))
+          PY
