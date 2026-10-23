@@ -22,7 +22,16 @@ import { applyFilter, countdown, distinct, toggle } from './src/core/filter.ts';
 import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
 import { fetchEvents, type FetchResult } from './src/data/sources.ts';
-import { cancelAlert, ensureNotificationsReady, scheduleAlert } from './src/data/notifications.ts';
+import {
+  cancelAlert,
+  ensureNotificationsReady,
+  exactAlarmsAllowed,
+  requestExactAlarms,
+  rescheduleAll,
+  scheduleAlert,
+  scheduledCount,
+  sendTestNotifications,
+} from './src/data/notifications.ts';
 import {
   loadAlerts,
   loadAutoUpdate,
@@ -101,7 +110,10 @@ function Main() {
       const [cached, storedPresets, storedRegion, storedAlerts] = await Promise.all([loadCache(), loadPresets(), loadRegion(), loadAlerts()]);
       if (cached && cached.region === storedRegion) setData(cached);
       if (storedPresets) setPresets(storedPresets);
-      setAlerts(pruneAlerts(storedAlerts, Date.now()));
+      const pruned = pruneAlerts(storedAlerts, Date.now());
+      setAlerts(pruned);
+      // Bells set by older versions were scheduled as inexact alarms; redo them.
+      if (Object.keys(pruned).length > 0) resyncAlerts(pruned);
       setRegion(storedRegion);
       const auto = await loadAutoUpdate();
       setAutoUpdate(auto);
@@ -185,6 +197,16 @@ function Main() {
         },
       },
     ]);
+  };
+
+  const resyncAlerts = async (current: Record<string, EventAlert>) => {
+    try {
+      const next = await rescheduleAll(current);
+      setAlerts(next);
+      saveAlerts(next);
+    } catch {
+      // Keep the existing schedule if the native call fails.
+    }
   };
 
   /** Replaces the bell on `event`; empty choices remove it. */
@@ -301,6 +323,7 @@ function Main() {
           saveAutoUpdate(v);
         }}
         onCheckUpdate={() => lookForUpdate(false)}
+        onExactAlarmsGranted={() => resyncAlerts(alerts)}
         onClose={() => setShowSettings(false)}
       />
 
@@ -519,6 +542,7 @@ function SettingsModal(props: {
   updateStatus: string | null;
   onAutoUpdate: (v: boolean) => void;
   onCheckUpdate: () => void;
+  onExactAlarmsGranted: () => void;
   onClose: () => void;
 }) {
   return (
@@ -538,6 +562,8 @@ function SettingsModal(props: {
               {props.data ? `${props.data.source} · ${props.data.events.length} événements` : 'Aucune donnée chargée'}
             </Text>
             {props.errors.length > 0 && <ErrorBox errors={props.errors} />}
+
+            {props.visible && <NotificationSettings onExactAlarmsGranted={props.onExactAlarmsGranted} />}
 
             {updatesSupported && (
               <>
@@ -567,6 +593,52 @@ function SettingsModal(props: {
         </SafeAreaView>
       </SafeAreaProvider>
     </Modal>
+  );
+}
+
+/** Shows whether reminders can fire on time and lets the user send test notifications. */
+function NotificationSettings({ onExactAlarmsGranted }: { onExactAlarmsGranted: () => void }) {
+  const [exact, setExact] = useState<boolean | null>(null);
+  const [count, setCount] = useState<number | null>(null);
+
+  const refresh = useCallback(async () => {
+    setExact(await exactAlarmsAllowed());
+    setCount(await scheduledCount());
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const allow = async () => {
+    if (await requestExactAlarms()) onExactAlarmsGranted();
+    refresh();
+  };
+
+  const test = async () => {
+    await sendTestNotifications();
+    refresh();
+    Alert.alert('Test lancé', 'Tu vas recevoir 3 notifications dans 15, 30 et 45 secondes. Tu peux fermer l’app.');
+  };
+
+  return (
+    <>
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Notifications</Text>
+      <Text style={[styles.text, { paddingHorizontal: 16, marginTop: 4 }]}>
+        Rappels à l’heure pile : {exact === null ? '…' : exact ? 'autorisés ✓' : 'non autorisés'}
+      </Text>
+      {count !== null && <Text style={styles.hint}>Rappels programmés : {count}</Text>}
+      <View style={[styles.saveRow, { marginTop: 12 }]}>
+        {exact === false && (
+          <Pressable onPress={allow} style={[styles.button, { flex: 1 }]}>
+            <Text style={styles.buttonText}>Autoriser</Text>
+          </Pressable>
+        )}
+        <Pressable onPress={test} style={[styles.button, styles.buttonGhost, { flex: 1 }]}>
+          <Text style={[styles.buttonText, { color: colors.text }]}>Tester les notifications</Text>
+        </Pressable>
+      </View>
+    </>
   );
 }
 
