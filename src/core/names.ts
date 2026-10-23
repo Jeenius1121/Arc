@@ -1,17 +1,16 @@
 /**
- * French names as shown in the game's French localisation. Sources disagree
- * on some names; entries marked "unconfirmed" keep the closest name found and
- * should be checked in-game. Unknown names fall back to the English one.
+ * French names as shown in the game's French localisation, taken from
+ * arctracker.io/fr/map-events. Unknown names fall back to the English one.
  */
 
 const MAPS: Array<[RegExp, string]> = [
-  [/dam|barrage/i, 'Champ de bataille du barrage'],
+  [/dam|barrage/i, 'Champ de bataille du Barrage'],
   [/buried|enfouie/i, 'Ville enfouie'],
   [/space.?port|port spatial/i, 'Port spatial'],
   [/blue.?gate|portail bleu/i, 'Portail bleu'],
   [/stella|montis/i, 'Stella Montis'],
   [/pendola/i, 'Col de Pendola'],
-  [/riven/i, 'Riven Tides'], // unconfirmed: French articles keep the English name
+  [/riven/i, 'Riven Tides'],
 ];
 
 const CONDITIONS: Record<string, string> = {
@@ -21,17 +20,35 @@ const CONDITIONS: Record<string, string> = {
   'locked gate': 'Portail verrouillé',
   matriarch: 'Matriarche',
   harvester: 'Récolteur',
-  'hidden bunker': 'Bunker caché',
-  'husk graveyard': "Cimetière d'épaves",
-  'lush blooms': 'Saison des récoltes',
-  'uncovered caches': 'Caches de raider',
+  'lush blooms': 'Floraisons luxuriantes',
   'prospecting probes': 'Sondes de prospection',
+  'husk graveyard': "Cimetière d'épaves",
+  'uncovered caches': 'Caches de raider',
   'launch tower loot': 'Butin de la tour de lancement',
-  'bird city': 'La Ville aux oiseaux',
+  'hidden bunker': 'Bunker caché',
+  'bird city': 'Cité des Oiseaux',
+  beachcombing: 'Fouille de plage',
   hurricane: 'Ouragan',
+  'close scrutiny': 'Examen minutieux',
+  'arc frigate': 'Frégate ARC',
+  'acid rain': 'Pluie acide',
+  'delayed departure': 'Départ retardé',
+  derecho: 'Derecho',
+  'heat wave': 'Vague de chaleur',
+  'high winds': 'Grand vent',
+  sandcombing: 'Chasse aux trésors dans le sable',
+  'show of force': 'Démonstration de force',
+  'sifting for trinkets': 'À la recherche de petits trésors',
+  'some assembly required': 'Réparations requises',
+  'the queens': 'Les Reines',
+  'toxic swamp': 'Marécage toxique',
+  'toxic swamp - clean air': "Marécage toxique - Purification d'air",
+  'toxic swamp - rock collector': 'Marécage toxique - Collection de pierres',
+  'tube disruptions': 'Perturbations des tubes',
+  windswept: 'Battu par le vent',
   redirection: 'Redirection',
-  'arc frigate': 'Frégate ARC', // unconfirmed
-  // 'Beachcombing' and 'Close Scrutiny': no French name found yet.
+  'lost in transit': 'Perdu en transit',
+  'special delivery': 'Livraison spéciale',
 };
 
 export function mapName(raw: string): string {

@@ -68,7 +68,7 @@ test('parseMetaforge reads events-schedule', () => {
     data: [{ name: 'Matriarch', map: 'Dam', icon: 'x', startTime: NOW + H, endTime: NOW + 2 * H }],
     region: 'europe',
   });
-  assert.deepEqual(events.map((e) => [e.map, e.condition]), [['Champ de bataille du barrage', 'Matriarche']]);
+  assert.deepEqual(events.map((e) => [e.map, e.condition]), [['Champ de bataille du Barrage', 'Matriarche']]);
 });
 
 test('French names for maps and conditions', () => {
@@ -89,7 +89,7 @@ test('applyFilter combines criteria and sorts soonest first', () => {
     start: NOW + startH * H,
     end: NOW + (startH + 1) * H,
   });
-  const dam = 'Champ de bataille du barrage';
+  const dam = 'Champ de bataille du Barrage';
   const events = [
     ev(dam, 'Raid nocturne', 5),
     ev('Port spatial', 'Raid nocturne', 2),

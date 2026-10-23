@@ -40,4 +40,4 @@ npm run typecheck
 ## Limites connues
 
 - Le site officiel n'est pas une API documentée : si Embark change la page, le workflow *Check data sources* échouera et `parsers.ts` devra être adapté.
-- Quelques noms français n'ont pas pu être confirmés (voir les commentaires de `names.ts`).
+- Les noms français viennent de arctracker.io/fr/map-events ; un nouvel événement non listé s'affiche en anglais.
