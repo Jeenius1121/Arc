@@ -20,7 +20,7 @@ export function distinct(events: EventOccurrence[], key: 'map' | 'condition'): s
   return [...new Set(events.map((e) => e[key]))].sort((a, b) => a.localeCompare(b));
 }
 
-export function toggle(list: string[], value: string): string[] {
+export function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 

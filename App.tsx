@@ -18,6 +18,8 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { BEFORE_OPTIONS, alertSummary, optionAvailable, pruneAlerts, type EventAlert } from './src/core/alerts.ts';
 import { CATEGORIES, categoriesOf } from './src/core/categories.ts';
+import { DEFAULT_FAVORITES, type Favorites } from './src/core/favorites.ts';
+import { updateBackgroundRefresh } from './src/data/background.ts';
 import { applyFilter, countdown, distinct, toggle } from './src/core/filter.ts';
 import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
@@ -31,16 +33,19 @@ import {
   scheduleAlert,
   scheduledCount,
   sendTestNotifications,
+  syncFavorites,
 } from './src/data/notifications.ts';
 import {
   loadAlerts,
   loadAutoUpdate,
   loadCache,
+  loadFavorites,
   loadPresets,
   loadRegion,
   saveAlerts,
   saveAutoUpdate,
   saveCache,
+  saveFavorites,
   savePresets,
   saveRegion,
 } from './src/data/storage.ts';
@@ -88,6 +93,8 @@ function Main() {
   const [bellEvent, setBellEvent] = useState<EventOccurrence | null>(null);
   const [autoUpdate, setAutoUpdate] = useState(true);
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Favorites>(DEFAULT_FAVORITES);
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -115,6 +122,8 @@ function Main() {
       // Bells set by older versions were scheduled as inexact alarms; redo them.
       if (Object.keys(pruned).length > 0) resyncAlerts(pruned);
       setRegion(storedRegion);
+      setFavorites(await loadFavorites());
+      setFavoritesLoaded(true);
       const auto = await loadAutoUpdate();
       setAutoUpdate(auto);
       if (auto) lookForUpdate(true);
@@ -164,6 +173,25 @@ function Main() {
   const maps = useMemo(() => distinct(events, 'map'), [events]);
   const conditions = useMemo(() => distinct(events, 'condition'), [events]);
   const visible = useMemo(() => applyFilter(events, filter, now), [events, filter, now]);
+
+  // Keep favourite notifications in line with the latest schedule, bells and choices.
+  useEffect(() => {
+    if (!favoritesLoaded || events.length === 0) return;
+    const following = favorites.conditions.length > 0;
+    updateBackgroundRefresh(following);
+    (async () => {
+      if (following && !(await ensureNotificationsReady())) return;
+      await syncFavorites(events, favorites, alerts).catch(() => {});
+    })();
+  }, [events, favorites, alerts, favoritesLoaded]);
+
+  const changeFavorites = (next: Favorites) => {
+    setFavorites(next);
+    saveFavorites(next);
+  };
+
+  const toggleFavorite = (condition: string) =>
+    changeFavorites({ ...favorites, conditions: toggle(favorites.conditions, condition) });
 
   const selectPreset = (p: FilterPreset | null) => {
     setActivePreset(p?.id ?? null);
@@ -263,6 +291,13 @@ function Main() {
       <View style={styles.presetBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
           <Chip label="Tous" active={activePreset === null && filterCount === 0} onPress={() => selectPreset(null)} />
+          {favorites.conditions.length > 0 && (
+            <Chip
+              label="❤ Favoris"
+              active={activePreset === 'favorites'}
+              onPress={() => selectPreset({ id: 'favorites', name: 'Favoris', ...EMPTY_FILTER, conditions: favorites.conditions })}
+            />
+          )}
           {presets.map((p) => (
             <Chip key={p.id} label={p.name} active={activePreset === p.id} onPress={() => selectPreset(p)} onLongPress={() => deletePreset(p)} />
           ))}
@@ -284,7 +319,16 @@ function Main() {
       <FlatList
         data={visible}
         keyExtractor={(e) => e.id}
-        renderItem={({ item }) => <EventCard event={item} now={now} alert={alerts[item.id]} onBell={() => onBell(item)} />}
+        renderItem={({ item }) => (
+          <EventCard
+            event={item}
+            now={now}
+            alert={alerts[item.id]}
+            favorite={favorites.conditions.includes(item.condition)}
+            onBell={() => onBell(item)}
+            onHeart={() => toggleFavorite(item.condition)}
+          />
+        )}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => {
               if (region) refresh(region);
@@ -324,6 +368,8 @@ function Main() {
         }}
         onCheckUpdate={() => lookForUpdate(false)}
         onExactAlarmsGranted={() => resyncAlerts(alerts)}
+        favorites={favorites}
+        onFavorites={changeFavorites}
         onClose={() => setShowSettings(false)}
       />
 
@@ -341,7 +387,15 @@ function Main() {
   );
 }
 
-function EventCard({ event, now, alert, onBell }: { event: EventOccurrence; now: number; alert?: EventAlert; onBell: () => void }) {
+function EventCard(props: {
+  event: EventOccurrence;
+  now: number;
+  alert?: EventAlert;
+  favorite: boolean;
+  onBell: () => void;
+  onHeart: () => void;
+}) {
+  const { event, now, alert, favorite, onBell, onHeart } = props;
   const { running, text } = countdown(event, now);
   const fmt = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const day = new Date(event.start).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
@@ -362,14 +416,24 @@ function EventCard({ event, now, alert, onBell }: { event: EventOccurrence; now:
       </View>
       <View style={styles.cardSide}>
         <Text style={[styles.countdown, running && { color: colors.live }]}>{text}</Text>
-        <Pressable
-          onPress={onBell}
-          hitSlop={8}
-          style={[styles.bell, alert && styles.bellActive]}
-          accessibilityLabel={running ? 'Prévenir à la fin' : 'Programmer un rappel'}
-        >
-          <Text style={[styles.bellText, !alert && { opacity: 0.45 }]}>🔔</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Pressable
+            onPress={onHeart}
+            hitSlop={8}
+            style={[styles.bell, favorite && styles.heartActive]}
+            accessibilityLabel={favorite ? `Ne plus suivre ${event.condition}` : `Suivre ${event.condition}`}
+          >
+            <Text style={[styles.bellText, !favorite && { opacity: 0.45 }]}>{favorite ? '❤️' : '🤍'}</Text>
+          </Pressable>
+          <Pressable
+            onPress={onBell}
+            hitSlop={8}
+            style={[styles.bell, alert && styles.bellActive]}
+            accessibilityLabel={running ? 'Prévenir à la fin' : 'Programmer un rappel'}
+          >
+            <Text style={[styles.bellText, !alert && { opacity: 0.45 }]}>🔔</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -543,6 +607,8 @@ function SettingsModal(props: {
   onAutoUpdate: (v: boolean) => void;
   onCheckUpdate: () => void;
   onExactAlarmsGranted: () => void;
+  favorites: Favorites;
+  onFavorites: (f: Favorites) => void;
   onClose: () => void;
 }) {
   return (
@@ -562,6 +628,37 @@ function SettingsModal(props: {
               {props.data ? `${props.data.source} · ${props.data.events.length} événements` : 'Aucune donnée chargée'}
             </Text>
             {props.errors.length > 0 && <ErrorBox errors={props.errors} />}
+
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Favoris ❤</Text>
+            {props.favorites.conditions.length === 0 ? (
+              <Text style={styles.hint}>Touche le cœur d’un événement pour être prévenu à chaque fois qu’il revient, sur n’importe quelle carte.</Text>
+            ) : (
+              <>
+                <View style={[styles.chipRow, { flexWrap: 'wrap' }]}>
+                  {props.favorites.conditions.map((c) => (
+                    <Chip
+                      key={c}
+                      label={`${c}  ✕`}
+                      active
+                      onPress={() => props.onFavorites({ ...props.favorites, conditions: props.favorites.conditions.filter((x) => x !== c) })}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.hint}>Me prévenir :</Text>
+                <View style={[styles.chipRow, { flexWrap: 'wrap' }]}>
+                  {BEFORE_OPTIONS.filter((o) => o.minutes <= 60).map((o) => (
+                    <Chip
+                      key={o.minutes}
+                      label={o.minutes === 0 ? 'Au début' : o.label}
+                      active={props.favorites.minutesBefore.includes(o.minutes)}
+                      onPress={() =>
+                        props.onFavorites({ ...props.favorites, minutesBefore: toggle(props.favorites.minutesBefore, o.minutes) })
+                      }
+                    />
+                  ))}
+                </View>
+              </>
+            )}
 
             {props.visible && <NotificationSettings onExactAlarmsGranted={props.onExactAlarmsGranted} />}
 
@@ -710,6 +807,7 @@ const styles = StyleSheet.create({
   bell: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   bellActive: { backgroundColor: '#3a3220', borderColor: colors.accent },
   bellText: { fontSize: 16 },
+  heartActive: { backgroundColor: '#3a1f24', borderColor: colors.danger },
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.bg, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20, paddingBottom: 32, borderWidth: 1, borderColor: colors.border },
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },

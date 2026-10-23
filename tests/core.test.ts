@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.ts';
+import { favoriteTriggers } from '../src/core/favorites.ts';
 import { applyFilter, countdown } from '../src/core/filter.ts';
 import { conditionName, mapName } from '../src/core/names.ts';
 import { parseMetaforge, parseOfficial } from '../src/core/parsers.ts';
@@ -128,4 +129,22 @@ test('alert triggers skip past times and cover start, before and end', () => {
   assert.equal(optionAvailable(event, 60, NOW), false);
   assert.equal(optionAvailable(event, 30, NOW), true);
   assert.equal(alertSummary({ event, minutesBefore: [0, 60], atEnd: true, notificationIds: [] }), '1 h avant · début · fin');
+});
+
+test('favorite triggers cover every upcoming occurrence except belled ones', () => {
+  const ev = (id: string, condition: string, startH: number) => ({ id, map: 'Portail bleu', condition, start: NOW + startH * H, end: NOW + (startH + 1) * H });
+  const events = [
+    ev('a', 'Tempête électromagnétique', 2),
+    ev('b', 'Tempête électromagnétique', 10),
+    ev('c', 'Tempête électromagnétique', 12),
+    ev('d', 'Raid nocturne', 3),
+    ev('e', 'Tempête électromagnétique', -0.5), // already running
+  ];
+  const fav = { conditions: ['Tempête électromagnétique'], minutesBefore: [0, 15] };
+  const triggers = favoriteTriggers(events, fav, NOW, new Set(['c']));
+  assert.deepEqual(
+    triggers.map((t) => t.id),
+    ['fav:a|0', 'fav:a|15', 'fav:b|0', 'fav:b|15'],
+  );
+  assert.deepEqual(favoriteTriggers(events, { conditions: [], minutesBefore: [0] }, NOW, new Set()), []);
 });

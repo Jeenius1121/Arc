@@ -2,6 +2,8 @@ import * as Notifications from 'expo-notifications';
 import { Alert, Platform } from 'react-native';
 
 import { triggersFor, type EventAlert } from '../core/alerts.ts';
+import { FAVORITE_PREFIX, favoriteTriggers, type Favorites } from '../core/favorites.ts';
+import type { EventOccurrence } from '../core/types.ts';
 
 const CHANNEL_ID = 'events';
 
@@ -61,8 +63,9 @@ export async function requestExactAlarms(): Promise<boolean> {
   return (await Notifications.requestExactAlarmPermissionsAsync().catch(() => ({ granted: false }))).granted;
 }
 
-async function schedule(at: number, title: string, body: string): Promise<string> {
+async function schedule(at: number, title: string, body: string, identifier?: string): Promise<string> {
   return Notifications.scheduleNotificationAsync({
+    identifier,
     content: { title, body },
     // alarmClock (AlarmManager.setAlarmClock) is never deferred or throttled by
     // Doze, unlike regular alarms which may fire only once every ~9 minutes.
@@ -81,16 +84,39 @@ export async function cancelAlert(alert: EventAlert): Promise<void> {
 }
 
 /**
- * Cancels every scheduled notification and schedules the bells again, so they
- * pick up the current delivery mode and permissions.
+ * Cancels every scheduled bell notification and schedules the bells again, so
+ * they pick up the current delivery mode and permissions. Favourite
+ * notifications are left to syncFavorites().
  */
 export async function rescheduleAll(alerts: Record<string, EventAlert>): Promise<Record<string, EventAlert>> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled
+      .filter((n) => !n.identifier.startsWith(FAVORITE_PREFIX))
+      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+  );
   const next: Record<string, EventAlert> = {};
   for (const [id, a] of Object.entries(alerts)) {
     next[id] = { ...a, notificationIds: await scheduleAlert(a) };
   }
   return next;
+}
+
+/**
+ * Makes the scheduled favourite notifications match `events`: adds the
+ * missing ones and cancels those no longer wanted (unfavourited, belled...).
+ */
+export async function syncFavorites(events: EventOccurrence[], fav: Favorites, alerts: Record<string, EventAlert>): Promise<void> {
+  const wanted = favoriteTriggers(events, fav, Date.now(), new Set(Object.keys(alerts)));
+  const wantedIds = new Set(wanted.map((t) => t.id));
+  const scheduled = (await Notifications.getAllScheduledNotificationsAsync())
+    .map((n) => n.identifier)
+    .filter((id) => id.startsWith(FAVORITE_PREFIX));
+  const existing = new Set(scheduled);
+  await Promise.all(scheduled.filter((id) => !wantedIds.has(id)).map((id) => Notifications.cancelScheduledNotificationAsync(id)));
+  for (const t of wanted) {
+    if (!existing.has(t.id)) await schedule(t.at, `❤ ${t.title}`, t.body, t.id);
+  }
 }
 
 export async function scheduledCount(): Promise<number> {
