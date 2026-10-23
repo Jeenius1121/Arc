@@ -29,7 +29,10 @@ jobs:
               for m in re.finditer(r'self\.__next_f\.push\(\[\d+,("(?:[^"\\]|\\.)*")\]\)', t):
                   try: flight += json.loads(m.group(1))
                   except Exception: pass
-              for k in ('Night Raid', 'Raid', 'Riven', 'Beachcombing', 'Close Scrutiny', 'Frigate', 'Lush', 'Uncovered', 'Pendola'):
-                  for m in list(re.finditer(k, flight))[:3]:
-                      print(l, k, '>>', flight[max(0, m.start()-150): m.start()+150].replace('\n', ' '))
+              i = flight.find('"events":{"nightRaid"')
+              if i >= 0:
+                  d, _ = json.JSONDecoder().raw_decode(flight[i + len('"events":'):])
+                  print(l, 'EVENTS', json.dumps(d, ensure_ascii=False))
+              i = flight.find('"rivenTides"')
+              print(l, 'MAPS', flight[max(0, i - 250): i + 80])
           PY
