@@ -10,6 +10,7 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 - Liste triée du plus proche au plus lointain.
 - Filtres combinables (bouton **Filtres**) : catégories (Nuit, Orage / météo, Butin bonus, ARC majeur), cartes, événements exacts, « masquer les événements en cours ». Dans un même groupe les choix s'additionnent, entre groupes ils se combinent : « Orage » + « Champ de bataille du barrage » = les orages sur cette carte.
 - **Filtres enregistrés** : donne un nom au filtre dans la fenêtre Filtres → il apparaît en haut de l'écran. Appui long pour le supprimer.
+- **Notifications** : la cloche 🔔 sur un événement à venir permet de cocher un ou plusieurs rappels (au début, 5/15/30 min, 1 h ou 2 h avant, à la fin). Sur un événement en cours, la cloche prévient quand il se termine.
 - Cache hors ligne, actualisation toutes les 15 min ou en tirant la liste vers le bas.
 
 ## Installer sur Android sans ordinateur

@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { alertSummary, optionAvailable, triggersFor } from '../src/core/alerts.ts';
 import { applyFilter, countdown } from '../src/core/filter.ts';
 import { conditionName, mapName } from '../src/core/names.ts';
 import { parseMetaforge, parseOfficial } from '../src/core/parsers.ts';
@@ -111,4 +112,20 @@ test('countdown text', () => {
   const e = { id: 'x', map: 'm', condition: 'c', start: NOW + H + 65_000, end: NOW + 2 * H };
   assert.equal(countdown(e, NOW).text, 'Dans 1 h 01 min 05 s');
   assert.equal(countdown(e, NOW + 1.5 * H).running, true);
+});
+
+test('alert triggers skip past times and cover start, before and end', () => {
+  const event = { id: 'e', map: 'Stella Montis', condition: 'Raid nocturne', start: NOW + H, end: NOW + 2 * H };
+  const triggers = triggersFor({ event, minutesBefore: [0, 30, 120], atEnd: true }, NOW);
+  assert.deepEqual(
+    triggers.map((t) => t.at),
+    [NOW + 0.5 * H, NOW + H, NOW + 2 * H],
+    '2 h before is already past',
+  );
+  assert.match(triggers[0].body, /Commence dans 30 min/);
+  assert.equal(triggers[2].body, 'L’événement est terminé.');
+  assert.equal(triggers[0].title, 'Raid nocturne · Stella Montis');
+  assert.equal(optionAvailable(event, 60, NOW), false);
+  assert.equal(optionAvailable(event, 30, NOW), true);
+  assert.equal(alertSummary({ event, minutesBefore: [0, 60], atEnd: true, notificationIds: [] }), '1 h avant · début · fin');
 });

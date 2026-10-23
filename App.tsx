@@ -16,12 +16,14 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
+import { BEFORE_OPTIONS, alertSummary, optionAvailable, pruneAlerts, type EventAlert } from './src/core/alerts.ts';
 import { CATEGORIES, categoriesOf } from './src/core/categories.ts';
 import { applyFilter, countdown, distinct, toggle } from './src/core/filter.ts';
 import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
 import { fetchEvents, type FetchResult } from './src/data/sources.ts';
-import { loadCache, loadPresets, loadRegion, saveCache, savePresets, saveRegion } from './src/data/storage.ts';
+import { cancelAlert, ensureNotificationsReady, scheduleAlert } from './src/data/notifications.ts';
+import { loadAlerts, loadCache, loadPresets, loadRegion, saveAlerts, saveCache, savePresets, saveRegion } from './src/data/storage.ts';
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
 
@@ -61,6 +63,8 @@ function Main() {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [alerts, setAlerts] = useState<Record<string, EventAlert>>({});
+  const [bellEvent, setBellEvent] = useState<EventOccurrence | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -80,9 +84,10 @@ function Main() {
 
   useEffect(() => {
     (async () => {
-      const [cached, storedPresets, storedRegion] = await Promise.all([loadCache(), loadPresets(), loadRegion()]);
+      const [cached, storedPresets, storedRegion, storedAlerts] = await Promise.all([loadCache(), loadPresets(), loadRegion(), loadAlerts()]);
       if (cached && cached.region === storedRegion) setData(cached);
       if (storedPresets) setPresets(storedPresets);
+      setAlerts(pruneAlerts(storedAlerts, Date.now()));
       setRegion(storedRegion);
     })();
   }, []);
@@ -133,6 +138,32 @@ function Main() {
     ]);
   };
 
+  /** Replaces the bell on `event`; empty choices remove it. */
+  const updateAlert = async (event: EventOccurrence, minutesBefore: number[], atEnd: boolean) => {
+    const previous = alerts[event.id];
+    if (previous) await cancelAlert(previous);
+    const next = { ...alerts };
+    delete next[event.id];
+    if (minutesBefore.length > 0 || atEnd) {
+      if (!(await ensureNotificationsReady())) return;
+      const base = { event, minutesBefore, atEnd };
+      next[event.id] = { ...base, notificationIds: await scheduleAlert(base) };
+    }
+    setAlerts(next);
+    saveAlerts(next);
+  };
+
+  /** Running event: the bell toggles an "event finished" reminder. Upcoming: choose reminders. */
+  const onBell = (event: EventOccurrence) => {
+    if (event.start > Date.now()) {
+      setBellEvent(event);
+      return;
+    }
+    const current = alerts[event.id];
+    if (current?.atEnd) updateAlert(event, current.minutesBefore, false);
+    else updateAlert(event, [], true);
+  };
+
   const changeRegion = (r: RegionId) => {
     setRegion(r);
     saveRegion(r);
@@ -175,7 +206,7 @@ function Main() {
       <FlatList
         data={visible}
         keyExtractor={(e) => e.id}
-        renderItem={({ item }) => <EventCard event={item} now={now} />}
+        renderItem={({ item }) => <EventCard event={item} now={now} alert={alerts[item.id]} onBell={() => onBell(item)} />}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => {
               if (region) refresh(region);
@@ -209,11 +240,22 @@ function Main() {
         onRegion={changeRegion}
         onClose={() => setShowSettings(false)}
       />
+
+      <AlertModal
+        event={bellEvent}
+        alert={bellEvent ? alerts[bellEvent.id] : undefined}
+        now={now}
+        onSave={(minutesBefore, atEnd) => {
+          if (bellEvent) updateAlert(bellEvent, minutesBefore, atEnd);
+          setBellEvent(null);
+        }}
+        onClose={() => setBellEvent(null)}
+      />
     </SafeAreaView>
   );
 }
 
-function EventCard({ event, now }: { event: EventOccurrence; now: number }) {
+function EventCard({ event, now, alert, onBell }: { event: EventOccurrence; now: number; alert?: EventAlert; onBell: () => void }) {
   const { running, text } = countdown(event, now);
   const fmt = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const day = new Date(event.start).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
@@ -230,9 +272,93 @@ function EventCard({ event, now }: { event: EventOccurrence; now: number }) {
           {day} · {fmt(event.start)} – {fmt(event.end)}
           {cats ? `  ·  ${cats}` : ''}
         </Text>
+        {alert && <Text style={styles.cardAlert}>🔔 {alertSummary(alert)}</Text>}
       </View>
-      <Text style={[styles.countdown, running && { color: colors.live }]}>{text}</Text>
+      <View style={styles.cardSide}>
+        <Text style={[styles.countdown, running && { color: colors.live }]}>{text}</Text>
+        <Pressable
+          onPress={onBell}
+          hitSlop={8}
+          style={[styles.bell, alert && styles.bellActive]}
+          accessibilityLabel={running ? 'Prévenir à la fin' : 'Programmer un rappel'}
+        >
+          <Text style={[styles.bellText, !alert && { opacity: 0.45 }]}>🔔</Text>
+        </Pressable>
+      </View>
     </View>
+  );
+}
+
+/** Reminder picker for an upcoming event: several choices can be ticked at once. */
+function AlertModal(props: {
+  event: EventOccurrence | null;
+  alert?: EventAlert;
+  now: number;
+  onSave: (minutesBefore: number[], atEnd: boolean) => void;
+  onClose: () => void;
+}) {
+  const { event, alert, now } = props;
+  const [minutes, setMinutes] = useState<number[]>([]);
+  const [atEnd, setAtEnd] = useState(false);
+
+  useEffect(() => {
+    setMinutes(alert?.minutesBefore ?? (event ? [0] : []));
+    setAtEnd(alert?.atEnd ?? false);
+  }, [event, alert]);
+
+  if (!event) return null;
+  const toggleMinutes = (m: number) => setMinutes((list) => (list.includes(m) ? list.filter((x) => x !== m) : [...list, m]));
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={props.onClose}>
+      <Pressable style={styles.sheetBackdrop} onPress={props.onClose}>
+        <Pressable style={styles.sheet} onPress={() => {}}>
+          <Text style={styles.title}>Me prévenir</Text>
+          <Text style={[styles.cardMap, { marginBottom: 8 }]}>
+            {event.condition} · {event.map}
+          </Text>
+          {BEFORE_OPTIONS.map((o) => {
+            const available = optionAvailable(event, o.minutes, now);
+            return (
+              <CheckRow
+                key={o.minutes}
+                label={o.label}
+                checked={available && minutes.includes(o.minutes)}
+                disabled={!available}
+                onPress={() => toggleMinutes(o.minutes)}
+              />
+            );
+          })}
+          <CheckRow label="À la fin de l’événement" checked={atEnd} onPress={() => setAtEnd((v) => !v)} />
+          <View style={[styles.saveRow, { paddingHorizontal: 0, marginTop: 16 }]}>
+            {alert && (
+              <Pressable onPress={() => props.onSave([], false)} style={[styles.button, styles.buttonGhost]}>
+                <Text style={[styles.buttonText, { color: colors.danger }]}>Retirer</Text>
+              </Pressable>
+            )}
+            <View style={{ flex: 1 }} />
+            <Pressable onPress={props.onClose} style={[styles.button, styles.buttonGhost]}>
+              <Text style={[styles.buttonText, { color: colors.text }]}>Annuler</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => props.onSave(minutes.filter((m) => optionAvailable(event, m, Date.now())), atEnd)}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Valider</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+function CheckRow(props: { label: string; checked: boolean; disabled?: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={props.onPress} disabled={props.disabled} style={[styles.checkRow, props.disabled && { opacity: 0.35 }]}>
+      <View style={[styles.checkbox, props.checked && styles.checkboxOn]}>{props.checked && <Text style={styles.checkMark}>✓</Text>}</View>
+      <Text style={styles.text}>{props.label}</Text>
+    </Pressable>
   );
 }
 
@@ -419,6 +545,17 @@ const styles = StyleSheet.create({
   cardMap: { color: colors.accent, fontSize: 14, marginTop: 2 },
   cardMeta: { color: colors.muted, fontSize: 12, marginTop: 4 },
   countdown: { color: colors.text, fontSize: 14, fontWeight: '600', fontVariant: ['tabular-nums'], textAlign: 'right', maxWidth: 140 },
+  cardAlert: { color: colors.accent, fontSize: 12, marginTop: 4 },
+  cardSide: { alignItems: 'flex-end', gap: 8 },
+  bell: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+  bellActive: { backgroundColor: '#3a3220', borderColor: colors.accent },
+  bellText: { fontSize: 16 },
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: colors.bg, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20, paddingBottom: 32, borderWidth: 1, borderColor: colors.border },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  checkbox: { width: 22, height: 22, borderRadius: 5, borderWidth: 2, borderColor: colors.muted, alignItems: 'center', justifyContent: 'center' },
+  checkboxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  checkMark: { color: '#111', fontSize: 14, fontWeight: '700' },
   empty: { color: colors.muted, textAlign: 'center', marginTop: 40 },
   errorBox: { marginHorizontal: 16, marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: '#2a1618', borderWidth: 1, borderColor: colors.danger },
   errorText: { color: colors.danger, fontSize: 12 },

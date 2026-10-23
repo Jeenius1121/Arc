@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import type { EventAlert } from '../core/alerts.ts';
 import type { RegionId } from '../core/parsers.ts';
 import type { FilterPreset } from '../core/types.ts';
 import type { FetchResult } from './sources.ts';
@@ -31,3 +32,7 @@ export const loadCache = () => load<FetchResult | null>(CACHE_KEY, null);
 export const saveCache = (r: FetchResult) => save(CACHE_KEY, r);
 export const loadRegion = () => load<RegionId>(REGION_KEY, 'europe');
 export const saveRegion = (r: RegionId) => save(REGION_KEY, r);
+
+const ALERTS_KEY = 'arc.alerts.v1';
+export const loadAlerts = () => load<Record<string, EventAlert>>(ALERTS_KEY, {});
+export const saveAlerts = (a: Record<string, EventAlert>) => save(ALERTS_KEY, a);
