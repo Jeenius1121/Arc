@@ -15,7 +15,9 @@ Une application mobile (Expo / React Native) qui affiche les comptes à rebours 
 
 ## Installer sur Android sans ordinateur
 
-À chaque mise à jour du code, GitHub compile l'APK et le publie sur la page *Releases* → `apk-latest` (`app-release.apk`). Ouvre-la connecté à ton compte GitHub (le dépôt est privé).
+À chaque mise à jour du code, GitHub compile l'APK et le publie sur la page *Releases* → `apk-latest` (`app-release.apk`, accompagné de `version.json`).
+
+Une fois installée, l'app se met à jour toute seule : au démarrage (désactivable dans ⚙) ou avec le bouton *Rechercher une mise à jour*, elle compare son numéro de build à `version.json`, télécharge le nouvel APK et ouvre l'installateur Android. Le dépôt doit être public pour que ces fichiers soient accessibles.
 
 ## Lancer l'app
 

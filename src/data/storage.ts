@@ -36,3 +36,7 @@ export const saveRegion = (r: RegionId) => save(REGION_KEY, r);
 const ALERTS_KEY = 'arc.alerts.v1';
 export const loadAlerts = () => load<Record<string, EventAlert>>(ALERTS_KEY, {});
 export const saveAlerts = (a: Record<string, EventAlert>) => save(ALERTS_KEY, a);
+
+const AUTO_UPDATE_KEY = 'arc.autoUpdate.v1';
+export const loadAutoUpdate = () => load<boolean>(AUTO_UPDATE_KEY, true);
+export const saveAutoUpdate = (v: boolean) => save(AUTO_UPDATE_KEY, v);

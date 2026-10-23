@@ -23,7 +23,19 @@ import { REGIONS, type RegionId } from './src/core/parsers.ts';
 import { EMPTY_FILTER, type EventOccurrence, type FilterPreset, type FilterState } from './src/core/types.ts';
 import { fetchEvents, type FetchResult } from './src/data/sources.ts';
 import { cancelAlert, ensureNotificationsReady, scheduleAlert } from './src/data/notifications.ts';
-import { loadAlerts, loadCache, loadPresets, loadRegion, saveAlerts, saveCache, savePresets, saveRegion } from './src/data/storage.ts';
+import {
+  loadAlerts,
+  loadAutoUpdate,
+  loadCache,
+  loadPresets,
+  loadRegion,
+  saveAlerts,
+  saveAutoUpdate,
+  saveCache,
+  savePresets,
+  saveRegion,
+} from './src/data/storage.ts';
+import { checkForUpdate, currentBuild, installUpdate, updatesSupported, type UpdateInfo } from './src/data/updates.ts';
 
 const AUTO_REFRESH_MS = 15 * 60 * 1000;
 
@@ -65,6 +77,8 @@ function Main() {
   const [showSettings, setShowSettings] = useState(false);
   const [alerts, setAlerts] = useState<Record<string, EventAlert>>({});
   const [bellEvent, setBellEvent] = useState<EventOccurrence | null>(null);
+  const [autoUpdate, setAutoUpdate] = useState(true);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -89,8 +103,43 @@ function Main() {
       if (storedPresets) setPresets(storedPresets);
       setAlerts(pruneAlerts(storedAlerts, Date.now()));
       setRegion(storedRegion);
+      const auto = await loadAutoUpdate();
+      setAutoUpdate(auto);
+      if (auto) lookForUpdate(true);
     })();
   }, []);
+
+  const startUpdate = async (update: UpdateInfo) => {
+    try {
+      setUpdateStatus('Téléchargement de la mise à jour…');
+      await installUpdate(update, (ratio) => setUpdateStatus(`Téléchargement de la mise à jour… ${Math.round(ratio * 100)} %`));
+      setUpdateStatus(null);
+    } catch (e) {
+      setUpdateStatus(null);
+      Alert.alert('Mise à jour impossible', e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  /** At launch (`silent`) only an available update is reported; from the button, every outcome is. */
+  const lookForUpdate = async (silent: boolean) => {
+    if (!updatesSupported) return;
+    try {
+      if (!silent) setUpdateStatus('Recherche de mise à jour…');
+      const update = await checkForUpdate();
+      setUpdateStatus(null);
+      if (update) {
+        Alert.alert('Mise à jour disponible', `La version ${update.buildNumber} est disponible (tu as la ${currentBuild}). L’installer maintenant ?`, [
+          { text: 'Plus tard', style: 'cancel' },
+          { text: 'Installer', onPress: () => startUpdate(update) },
+        ]);
+      } else if (!silent) {
+        Alert.alert('Application à jour', `Tu as la dernière version (${currentBuild}).`);
+      }
+    } catch (e) {
+      setUpdateStatus(null);
+      if (!silent) Alert.alert('Vérification impossible', e instanceof Error ? e.message : String(e));
+    }
+  };
 
   useEffect(() => {
     if (!region) return;
@@ -201,6 +250,13 @@ function Main() {
         </Pressable>
       </View>
 
+      {updateStatus && (
+        <View style={styles.updateBanner}>
+          <ActivityIndicator color={colors.accent} size="small" />
+          <Text style={styles.text}>{updateStatus}</Text>
+        </View>
+      )}
+
       {errors.length > 0 && !data && <ErrorBox errors={errors} />}
 
       <FlatList
@@ -238,6 +294,13 @@ function Main() {
         data={data}
         errors={errors}
         onRegion={changeRegion}
+        autoUpdate={autoUpdate}
+        updateStatus={updateStatus}
+        onAutoUpdate={(v) => {
+          setAutoUpdate(v);
+          saveAutoUpdate(v);
+        }}
+        onCheckUpdate={() => lookForUpdate(false)}
         onClose={() => setShowSettings(false)}
       />
 
@@ -452,6 +515,10 @@ function SettingsModal(props: {
   data: FetchResult | null;
   errors: string[];
   onRegion: (r: RegionId) => void;
+  autoUpdate: boolean;
+  updateStatus: string | null;
+  onAutoUpdate: (v: boolean) => void;
+  onCheckUpdate: () => void;
   onClose: () => void;
 }) {
   return (
@@ -471,6 +538,26 @@ function SettingsModal(props: {
               {props.data ? `${props.data.source} · ${props.data.events.length} événements` : 'Aucune donnée chargée'}
             </Text>
             {props.errors.length > 0 && <ErrorBox errors={props.errors} />}
+
+            {updatesSupported && (
+              <>
+                <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Mises à jour</Text>
+                <Text style={[styles.text, { paddingHorizontal: 16, marginTop: 4 }]}>Version installée : {currentBuild || 'dev'}</Text>
+                <View style={styles.switchRow}>
+                  <Text style={[styles.text, { flex: 1 }]}>Vérifier à chaque démarrage</Text>
+                  <Switch value={props.autoUpdate} onValueChange={props.onAutoUpdate} />
+                </View>
+                <View style={[styles.saveRow, { marginTop: 12 }]}>
+                  <Pressable
+                    onPress={props.onCheckUpdate}
+                    disabled={!!props.updateStatus}
+                    style={[styles.button, { flex: 1 }, !!props.updateStatus && { opacity: 0.5 }]}
+                  >
+                    <Text style={styles.buttonText}>{props.updateStatus ?? 'Rechercher une mise à jour'}</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </ScrollView>
           <View style={styles.modalFooter}>
             <Pressable onPress={props.onClose} style={[styles.button, styles.buttonWide]}>
@@ -546,6 +633,7 @@ const styles = StyleSheet.create({
   cardMeta: { color: colors.muted, fontSize: 12, marginTop: 4 },
   countdown: { color: colors.text, fontSize: 14, fontWeight: '600', fontVariant: ['tabular-nums'], textAlign: 'right', maxWidth: 140 },
   cardAlert: { color: colors.accent, fontSize: 12, marginTop: 4 },
+  updateBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 16, marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.accent },
   cardSide: { alignItems: 'flex-end', gap: 8 },
   bell: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   bellActive: { backgroundColor: '#3a3220', borderColor: colors.accent },
