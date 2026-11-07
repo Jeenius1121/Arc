@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "date": "2026-11-07",
+  "notes": [
+    "Première version de Tracker",
+    "Fiche mission pour chaque objet : meilleure carte, zones, itinéraire, étapes et indice de chance",
+    "Planificateur de fabrication d'armes avec plan de raids",
+    "Ma liste : objectifs suivis et raids fusionnés",
+    "Mises à jour intégrées via le bandeau en haut de l'écran"
+  ]
+}

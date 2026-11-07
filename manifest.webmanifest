@@ -1,0 +1,19 @@
+{
+  "name": "Tracker — Raider Companion",
+  "short_name": "Tracker",
+  "description": "Choisis l'objet qu'il te manque : Tracker te donne la meilleure carte, les zones, l'itinéraire et les étapes. Application de fans pour ARC Raiders, non officielle.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0d0f",
+  "theme_color": "#0c0d0f",
+  "categories": ["games", "utilities"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
