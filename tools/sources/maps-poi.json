@@ -1,0 +1,1167 @@
+{
+ "_source": "Relevés communautaires de la carte du jeu (types de butin affichés sous chaque zone, niveau de valeur, positions relatives).",
+ "maps": {
+  "dam": {
+   "id": "dam",
+   "nameEn": "Dam Battlegrounds",
+   "difficulty": 2,
+   "length": "30 min",
+   "pois": [
+    {
+     "name": "West Broken Bridge",
+     "x": 0.5145,
+     "y": 0.0911,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Pattern House",
+     "x": 0.6165,
+     "y": 0.1287,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Ruby Residence",
+     "x": 0.31,
+     "y": 0.1687,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Pale Apartments",
+     "x": 0.2045,
+     "y": 0.2445,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Ben Welder's Sunroof",
+     "x": 0.28,
+     "y": 0.2894,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Generator Hall",
+     "x": 0.618,
+     "y": 0.226,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Power Generation Complex",
+     "x": 0.6815,
+     "y": 0.2654,
+     "tags": [
+      "Electrical",
+      "Industrial"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Controlled Access Zone",
+     "x": 0.605,
+     "y": 0.314,
+     "tags": [
+      "ARC",
+      "Mechanical"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Hydroponic Dome Complex",
+     "x": 0.4425,
+     "y": 0.343,
+     "tags": [
+      "Nature",
+      "Industrial",
+      "Security"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Pipeline Tower",
+     "x": 0.662,
+     "y": 0.3559,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "The Breach",
+     "x": 0.578,
+     "y": 0.4058,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Old Battleground",
+     "x": 0.1945,
+     "y": 0.4415,
+     "tags": [
+      "ARC"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Floodgates",
+     "x": 0.539,
+     "y": 0.4938,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Water Treatment Control",
+     "x": 0.344,
+     "y": 0.577,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "South Swamp Outpost",
+     "x": 0.194,
+     "y": 0.5837,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Primary Facility",
+     "x": 0.478,
+     "y": 0.5948,
+     "tags": [
+      "Mechanical",
+      "Industrial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Control Tower",
+     "x": 0.547,
+     "y": 0.6164,
+     "tags": [
+      "Technological",
+      "Security"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Research & Administration",
+     "x": 0.5215,
+     "y": 0.67,
+     "tags": [
+      "Commercial",
+      "Technological"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Red Lakes Balcony",
+     "x": 0.6315,
+     "y": 0.6995,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Electrical Substation",
+     "x": 0.3225,
+     "y": 0.7445,
+     "tags": [
+      "Electrical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Small Creek",
+     "x": 0.4975,
+     "y": 0.7432,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Testing Annex",
+     "x": 0.661,
+     "y": 0.798,
+     "tags": [
+      "Medical",
+      "Commercial"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Water Towers",
+     "x": 0.2485,
+     "y": 0.8017,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Wreckage",
+     "x": 0.544,
+     "y": 0.8584,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Scrap Yard",
+     "x": 0.4645,
+     "y": 0.8762,
+     "tags": [
+      "Mechanical",
+      "Industrial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Formicai Outpost",
+     "x": 0.473,
+     "y": 0.9908,
+     "tags": [],
+     "tier": null
+    }
+   ]
+  },
+  "buried_city": {
+   "id": "buried_city",
+   "nameEn": "Buried City",
+   "difficulty": 3,
+   "length": "30 min",
+   "pois": [
+    {
+     "name": "Hospital",
+     "x": 0.519,
+     "y": 0.2182,
+     "tags": [
+      "Medical"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Library",
+     "x": 0.43,
+     "y": 0.2941,
+     "tags": [
+      "Commercial",
+      "Old World"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Space Travel",
+     "x": 0.5925,
+     "y": 0.3724,
+     "tags": [
+      "Commercial",
+      "Technological"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Research",
+     "x": 0.568,
+     "y": 0.41,
+     "tags": [
+      "Medical",
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Town Hall",
+     "x": 0.5485,
+     "y": 0.5382,
+     "tags": [
+      "Old World"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Piazza Arbusto",
+     "x": 0.681,
+     "y": 0.5894,
+     "tags": [
+      "Medical",
+      "Commercial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Grandioso Apartments",
+     "x": 0.2855,
+     "y": 0.6735,
+     "tags": [
+      "Residential"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Santa Maria Houses",
+     "x": 0.504,
+     "y": 0.6759,
+     "tags": [
+      "Residential",
+      "Old World"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Plaza Rosa",
+     "x": 0.517,
+     "y": 0.7771,
+     "tags": [
+      "Medical",
+      "Commercial"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Galleria",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Commercial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Marano Park",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Nature"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Parking Garage",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Mechanical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Red Tower",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Residential"
+     ],
+     "tier": null
+    }
+   ]
+  },
+  "spaceport": {
+   "id": "spaceport",
+   "nameEn": "Spaceport",
+   "difficulty": 3,
+   "length": "30 min (40 min during Hidden Bunker)",
+   "pois": [
+    {
+     "name": "Fuel Depot",
+     "x": 0.2,
+     "y": 0.1158,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "West Hangar",
+     "x": 0.548,
+     "y": 0.0872,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "West Container Yard",
+     "x": 0.4485,
+     "y": 0.1501,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Jiangsu Warehouse",
+     "x": 0.1375,
+     "y": 0.1756,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Shipping Warehouse",
+     "x": 0.4045,
+     "y": 0.1899,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "East Hangar",
+     "x": 0.6295,
+     "y": 0.1719,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "North Trench Tower",
+     "x": 0.551,
+     "y": 0.1936,
+     "tags": [
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "South Trench Tower",
+     "x": 0.528,
+     "y": 0.2285,
+     "tags": [
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "The Trench",
+     "x": 0.5635,
+     "y": 0.2628,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Car Park",
+     "x": 0.2945,
+     "y": 0.2503,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Arrival Building",
+     "x": 0.328,
+     "y": 0.2933,
+     "tags": [
+      "Commercial",
+      "Technological"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Little Hangar",
+     "x": 0.716,
+     "y": 0.2939,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Water Towers",
+     "x": 0.042,
+     "y": 0.345,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Fuel Control",
+     "x": 0.6085,
+     "y": 0.3829,
+     "tags": [
+      "Mechanical",
+      "Electrical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Launch Towers",
+     "x": 0.458,
+     "y": 0.4228,
+     "tags": [
+      "Technological",
+      "Security"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "East Container Yard",
+     "x": 0.7055,
+     "y": 0.411,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Rocket Assembly",
+     "x": 0.646,
+     "y": 0.4502,
+     "tags": [
+      "Exodus",
+      "Industrial"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Departure Building",
+     "x": 0.322,
+     "y": 0.4795,
+     "tags": [
+      "Commercial",
+      "Technological"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Fuel Processing",
+     "x": 0.147,
+     "y": 0.5797,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Fuel Lines",
+     "x": 0.313,
+     "y": 0.6252,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Control Tower A6",
+     "x": 0.513,
+     "y": 0.6171,
+     "tags": [
+      "Technological",
+      "Commercial"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Container Storage",
+     "x": 0.605,
+     "y": 0.6706,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Vehicle Maintenance",
+     "x": 0.5025,
+     "y": 0.7105,
+     "tags": [
+      "Mechanical",
+      "Industrial"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Fuel Storage",
+     "x": 0.2575,
+     "y": 0.8898,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Maintenance Hangar",
+     "x": 0.4305,
+     "y": 0.8823,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Staff Parking",
+     "x": 0.572,
+     "y": 0.9359,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Security Checkpoint",
+     "x": 0.667,
+     "y": 0.9938,
+     "tags": [],
+     "tier": null
+    }
+   ]
+  },
+  "blue_gate": {
+   "id": "blue_gate",
+   "nameEn": "The Blue Gate",
+   "difficulty": 4,
+   "length": "30 min (40 min during Locked Gate)",
+   "pois": [
+    {
+     "name": "Village",
+     "x": 0.2795,
+     "y": 0.2124,
+     "tags": [
+      "Commercial",
+      "Residential"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Barren Clearing",
+     "x": 0.09,
+     "y": 0.2914,
+     "tags": [
+      "ARC"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Raider's Refuge",
+     "x": 0.204,
+     "y": 0.335,
+     "tags": [
+      "Residential"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Reinforced Reception",
+     "x": 0.4385,
+     "y": 0.2908,
+     "tags": [
+      "Security",
+      "Technological"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Data Vault",
+     "x": 0.5685,
+     "y": 0.2408,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Headhouse",
+     "x": 0.5215,
+     "y": 0.318,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Pilgrim's Peak",
+     "x": 0.7145,
+     "y": 0.2408,
+     "tags": [
+      "Technological",
+      "Electrical"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Trapper's Glade",
+     "x": 0.1925,
+     "y": 0.4153,
+     "tags": [
+      "Nature"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Outer Gates",
+     "x": 0.4515,
+     "y": 0.4355,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Warehouse Complex",
+     "x": 0.5665,
+     "y": 0.4431,
+     "tags": [
+      "Industrial"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Gate Control Room",
+     "x": 0.5245,
+     "y": 0.4684,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Abandoned Housing Project",
+     "x": 0.719,
+     "y": 0.4665,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Adorned Wreckage",
+     "x": 0.153,
+     "y": 0.4893,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Checkpoint",
+     "x": 0.3885,
+     "y": 0.5278,
+     "tags": [
+      "Mechanical"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Ridgeline",
+     "x": 0.6845,
+     "y": 0.5702,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Maintenance Bunker",
+     "x": 0.4835,
+     "y": 0.658,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Highway Collapse",
+     "x": 0.226,
+     "y": 0.7061,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Broken Earth",
+     "x": 0.515,
+     "y": 0.7118,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Olive Grove",
+     "x": 0.344,
+     "y": 0.7351,
+     "tags": [
+      "Nature"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Ruined Homestead",
+     "x": 0.394,
+     "y": 0.7743,
+     "tags": [
+      "Old World",
+      "Residential"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Ancient Fort",
+     "x": 0.4665,
+     "y": 0.8704,
+     "tags": [
+      "Old World",
+      "Technological"
+     ],
+     "tier": "medium"
+    }
+   ]
+  },
+  "riven_tides": {
+   "id": "riven_tides",
+   "nameEn": "Riven Tides",
+   "difficulty": 5,
+   "length": "30 min",
+   "pois": [
+    {
+     "name": "Wavebreaker",
+     "x": 0.5975,
+     "y": 0.2727,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Seabed",
+     "x": 0.319,
+     "y": 0.3122,
+     "tags": [
+      "Nature"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Port Authority Building",
+     "x": 0.412,
+     "y": 0.3561,
+     "tags": [
+      "Technological",
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Wreckage",
+     "x": 0.49,
+     "y": 0.3871,
+     "tags": [
+      "ARC"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Azzurro Beach",
+     "x": 0.2215,
+     "y": 0.4245,
+     "tags": [
+      "Residential"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Stacking Yard",
+     "x": 0.622,
+     "y": 0.5007,
+     "tags": [
+      "Industrial",
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Hotel Panorama Azzurro",
+     "x": 0.2405,
+     "y": 0.6237,
+     "tags": [
+      "Commercial",
+      "Residential"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Transfer Depot",
+     "x": 0.687,
+     "y": 0.6374,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Weighing Checkpoint",
+     "x": 0.5885,
+     "y": 0.6921,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Customs House",
+     "x": 0.469,
+     "y": 0.7683,
+     "tags": [
+      "Industrial",
+      "Electrical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Tennis Court",
+     "x": 0.1995,
+     "y": 0.7849,
+     "tags": [],
+     "tier": null
+    }
+   ]
+  },
+  "stella_montis": {
+   "id": "stella_montis",
+   "nameEn": "Stella Montis",
+   "difficulty": 4,
+   "length": "30 min",
+   "pois": [
+    {
+     "name": "Collapsed Tunnel",
+     "x": 0.1896,
+     "y": 0.1506,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Western Tunnel",
+     "x": 0.2067,
+     "y": 0.206,
+     "tags": [
+      "Electrical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Lobby Metro",
+     "x": 0.4446,
+     "y": 0.1805,
+     "tags": [
+      "Industrial",
+      "Technological"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Robotic Sandbox A",
+     "x": 0.3308,
+     "y": 0.4025,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Logistics Admin",
+     "x": 0.0433,
+     "y": 0.454,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Loading Bay",
+     "x": 0.1504,
+     "y": 0.4795,
+     "tags": [
+      "Industrial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Sandbox",
+     "x": 0.335,
+     "y": 0.5205,
+     "tags": [
+      "Mechanical",
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Control Room",
+     "x": 0.32,
+     "y": 0.6058,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Robotic Sandbox B",
+     "x": 0.3283,
+     "y": 0.732,
+     "tags": [],
+     "tier": null
+    },
+    {
+     "name": "Eastern Tunnel",
+     "x": 0.6521,
+     "y": 0.5781,
+     "tags": [
+      "Electrical",
+      "Old World"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Seed Vault",
+     "x": 0.61,
+     "y": 0.9181,
+     "tags": [
+      "Nature"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Assembly",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Technological",
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Assembly Workshops",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Atrium",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Commercial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Business Center",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Exodus",
+      "Commercial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Communications",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Electrical",
+      "Technological"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Cultural Archives",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Old World"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Lobby",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Security",
+      "Technological"
+     ],
+     "tier": "medium"
+    },
+    {
+     "name": "Medical Research",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Medical",
+      "Technological"
+     ],
+     "tier": "high"
+    },
+    {
+     "name": "Red Checkpoint",
+     "x": null,
+     "y": null,
+     "tags": [
+      "Security"
+     ],
+     "tier": "medium"
+    }
+   ]
+  },
+  "pendola_pass": {
+   "id": "pendola_pass",
+   "nameEn": "Pendola Pass",
+   "difficulty": 3,
+   "length": "30 min",
+   "pois": [
+    {
+     "name": "Deep-Space Telescope",
+     "x": 0.6225,
+     "y": 0.1989,
+     "tags": [
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Cielo Sereno Observatory",
+     "x": 0.6225,
+     "y": 0.2947,
+     "tags": [
+      "Technological",
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Almatera Station",
+     "x": 0.3605,
+     "y": 0.3706,
+     "tags": [
+      "Commercial"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Railroad Junction",
+     "x": 0.5025,
+     "y": 0.3799,
+     "tags": [
+      "Mechanical",
+      "Electrical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Fallen Emperor",
+     "x": 0.1905,
+     "y": 0.4637,
+     "tags": [
+      "ARC"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Commissary Supermarket",
+     "x": 0.421,
+     "y": 0.5323,
+     "tags": [
+      "Commercial",
+      "Medical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Railyard",
+     "x": 0.5435,
+     "y": 0.6021,
+     "tags": [
+      "Industrial",
+      "Mechanical"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Old Town",
+     "x": 0.261,
+     "y": 0.6221,
+     "tags": [
+      "Residential",
+      "Old World"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Loading Platforms",
+     "x": 0.6065,
+     "y": 0.7365,
+     "tags": [
+      "Industrial",
+      "Exodus"
+     ],
+     "tier": null
+    },
+    {
+     "name": "Old Hamlet",
+     "x": 0.565,
+     "y": 0.9275,
+     "tags": [
+      "Old World"
+     ],
+     "tier": null
+    }
+   ]
+  }
+ }
+}

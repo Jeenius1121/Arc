@@ -1,0 +1,5037 @@
+{
+ "_source": "Agrégat de signalements communautaires de plans trouvés (carte, moment, type de salle, conteneur, zone).",
+ "totalReports": 2309,
+ "blueprints": {
+  "angled_grip_ii_blueprint": {
+   "n": 13,
+   "maps": {
+    "dam": 5,
+    "buried_city": 4,
+    "spaceport": 2,
+    "blue_gate": 2
+   },
+   "cond": {
+    "day": 5,
+    "night": 7,
+    "storm": 1
+   },
+   "room": {
+    "normal": 10,
+    "breach": 2,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     4
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "valise",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ],
+    [
+     "breach",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Pale Apartments",
+     2
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "angled_grip_iii_blueprint": {
+   "n": 15,
+   "maps": {
+    "dam": 8,
+    "blue_gate": 3,
+    "spaceport": 3,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 11,
+    "day": 1,
+    "storm": 2,
+    "bunker": 1
+   },
+   "room": {
+    "normal": 14,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     4
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "caisse_arme",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "vehicule",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "spaceport",
+     "The Trench",
+     1
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     1
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     1
+    ],
+    [
+     "blue_gate",
+     "Checkpoint",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "anvil_blueprint": {
+   "n": 141,
+   "maps": {
+    "dam": 61,
+    "buried_city": 34,
+    "spaceport": 21,
+    "blue_gate": 14,
+    "stella_montis": 11
+   },
+   "cond": {
+    "day": 96,
+    "night": 32,
+    "bunker": 1,
+    "storm": 1
+   },
+   "room": {
+    "normal": 112,
+    "key": 15,
+    "breach": 14
+   },
+   "cont": [
+    [
+     "cache_raider",
+     47
+    ],
+    [
+     "autre",
+     14
+    ],
+    [
+     "caisse_arme",
+     13
+    ],
+    [
+     "caisse_munitions",
+     11
+    ],
+    [
+     "tiroir",
+     7
+    ],
+    [
+     "casier_rouge",
+     6
+    ]
+   ],
+   "poi": [
+    [
+     "stella_montis",
+     "Lobby",
+     4
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     3
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     3
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     3
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     3
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     2
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     2
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     2
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "aphelion_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "barricade_kit_blueprint": {
+   "n": 15,
+   "maps": {
+    "dam": 5,
+    "spaceport": 5,
+    "buried_city": 4,
+    "blue_gate": 1
+   },
+   "cond": {
+    "day": 7,
+    "night": 7,
+    "storm": 1
+   },
+   "room": {
+    "normal": 13,
+    "breach": 1,
+    "key": 1
+   },
+   "cont": [
+    [
+     "breach",
+     4
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "tiroir",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "electronique",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Research & Administration",
+     2
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "blue_gate",
+     "Checkpoint",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ],
+    [
+     "spaceport",
+     "Control Tower A6",
+     1
+    ],
+    [
+     "dam",
+     "Primary Facility",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "bettina_blueprint": {
+   "n": 93,
+   "maps": {
+    "dam": 36,
+    "buried_city": 28,
+    "blue_gate": 14,
+    "spaceport": 10,
+    "stella_montis": 5
+   },
+   "cond": {
+    "day": 54,
+    "night": 30,
+    "storm": 4
+   },
+   "room": {
+    "normal": 71,
+    "breach": 11,
+    "key": 11
+   },
+   "cont": [
+    [
+     "cache_raider",
+     13
+    ],
+    [
+     "caisse_munitions",
+     9
+    ],
+    [
+     "breach",
+     9
+    ],
+    [
+     "autre",
+     9
+    ],
+    [
+     "caisse",
+     6
+    ],
+    [
+     "sac",
+     5
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Water Treatment Control",
+     4
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     3
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     2
+    ],
+    [
+     "dam",
+     "Control Tower",
+     2
+    ],
+    [
+     "stella_montis",
+     "Assembly",
+     2
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     2
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     2
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     2
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "blaze_grenade_blueprint": {
+   "n": 29,
+   "maps": {
+    "dam": 12,
+    "buried_city": 7,
+    "blue_gate": 6,
+    "spaceport": 4
+   },
+   "cond": {
+    "day": 13,
+    "night": 14,
+    "bunker": 1,
+    "storm": 1
+   },
+   "room": {
+    "normal": 21,
+    "breach": 4,
+    "key": 4
+   },
+   "cont": [
+    [
+     "breach",
+     6
+    ],
+    [
+     "casier_rouge",
+     4
+    ],
+    [
+     "casier",
+     3
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "tiroir",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Hospital",
+     3
+    ],
+    [
+     "dam",
+     "Generator Hall",
+     2
+    ],
+    [
+     "buried_city",
+     "Parking Garage",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     1
+    ],
+    [
+     "dam",
+     "Primary Facility",
+     1
+    ],
+    [
+     "blue_gate",
+     "Adorned Wreckage",
+     1
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "blue_light_stick_blueprint": {
+   "n": 9,
+   "maps": {
+    "blue_gate": 4,
+    "dam": 4,
+    "buried_city": 1
+   },
+   "cond": {
+    "day": 7,
+    "night": 2
+   },
+   "room": {
+    "normal": 5,
+    "breach": 3,
+    "key": 1
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "casier",
+     3
+    ],
+    [
+     "arpenteur",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     2
+    ],
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     1
+    ],
+    [
+     "dam",
+     "Water Towers",
+     1
+    ],
+    [
+     "dam",
+     "Electrical Substation",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "bobcat_blueprint": {
+   "n": 3,
+   "maps": {
+    "blue_gate": 2,
+    "spaceport": 1
+   },
+   "cond": {
+    "day": 2,
+    "night": 1
+   },
+   "room": {
+    "normal": 1,
+    "breach": 2
+   },
+   "cont": [
+    [
+     "casier",
+     1
+    ],
+    [
+     "breach",
+     1
+    ],
+    [
+     "autre",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "spaceport",
+     "Control Tower A6",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "burletta_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": "Industrial Espionage",
+   "only": null
+  },
+  "canto_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "combat_mk3_aggressive_blueprint": {
+   "n": 24,
+   "maps": {
+    "blue_gate": 16,
+    "buried_city": 5,
+    "spaceport": 2,
+    "dam": 1
+   },
+   "cond": {
+    "bunker": 1,
+    "day": 13,
+    "night": 9,
+    "storm": 1
+   },
+   "room": {
+    "normal": 8,
+    "breach": 15,
+    "key": 1
+   },
+   "cont": [
+    [
+     "casier",
+     9
+    ],
+    [
+     "arpenteur",
+     4
+    ],
+    [
+     "armoire",
+     3
+    ],
+    [
+     "tiroir",
+     3
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     4
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "blue_gate",
+     "Warehouse Complex",
+     1
+    ],
+    [
+     "spaceport",
+     "Control Tower A6",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "combat_mk3_flanking_blueprint": {
+   "n": 22,
+   "maps": {
+    "blue_gate": 10,
+    "dam": 5,
+    "buried_city": 3,
+    "stella_montis": 3,
+    "spaceport": 1
+   },
+   "cond": {
+    "day": 12,
+    "night": 5,
+    "bunker": 1,
+    "storm": 1
+   },
+   "room": {
+    "breach": 10,
+    "normal": 11,
+    "key": 1
+   },
+   "cont": [
+    [
+     "casier",
+     5
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "tiroir",
+     3
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "arpenteur",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     3
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "buried_city",
+     "Red Tower",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "dam",
+     "Old Battleground",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "blue_gate",
+     "Checkpoint",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "compensator_ii_blueprint": {
+   "n": 12,
+   "maps": {
+    "dam": 4,
+    "buried_city": 4,
+    "spaceport": 4
+   },
+   "cond": {
+    "night": 8,
+    "day": 4
+   },
+   "room": {
+    "normal": 7,
+    "breach": 4,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     6
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Research & Administration",
+     2
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "spaceport",
+     "Car Park",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ],
+    [
+     "spaceport",
+     "Shipping Warehouse",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "compensator_iii_blueprint": {
+   "n": 15,
+   "maps": {
+    "dam": 8,
+    "blue_gate": 5,
+    "spaceport": 2
+   },
+   "cond": {
+    "night": 10,
+    "day": 3,
+    "storm": 2
+   },
+   "room": {
+    "normal": 10,
+    "key": 4,
+    "breach": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     4
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Village",
+     2
+    ],
+    [
+     "blue_gate",
+     "Warehouse Complex",
+     1
+    ],
+    [
+     "spaceport",
+     "North Trench Tower",
+     1
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "complex_gun_parts_blueprint": {
+   "n": 9,
+   "maps": {
+    "blue_gate": 8,
+    "buried_city": 1
+   },
+   "cond": {
+    "day": 6,
+    "night": 2,
+    "storm": 1
+   },
+   "room": {
+    "breach": 8,
+    "normal": 1
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "boite_noire",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     3
+    ]
+   ],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "crash_mat_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "deadline_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "defibrillator_blueprint": {
+   "n": 43,
+   "maps": {
+    "buried_city": 23,
+    "dam": 10,
+    "spaceport": 7,
+    "blue_gate": 2,
+    "stella_montis": 1
+   },
+   "cond": {
+    "day": 17,
+    "night": 23,
+    "bunker": 1,
+    "storm": 1
+   },
+   "room": {
+    "normal": 32,
+    "breach": 1,
+    "key": 10
+   },
+   "cont": [
+    [
+     "tiroir",
+     20
+    ],
+    [
+     "armoire",
+     8
+    ],
+    [
+     "autre",
+     4
+    ],
+    [
+     "bureau",
+     2
+    ],
+    [
+     "vehicule",
+     2
+    ],
+    [
+     "arpenteur",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Hospital",
+     15
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     7
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     6
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     3
+    ],
+    [
+     "spaceport",
+     "Control Tower A6",
+     2
+    ],
+    [
+     "buried_city",
+     "Galleria",
+     1
+    ],
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "dolabra_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "equalizer_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "explosive_mine_blueprint": {
+   "n": 18,
+   "maps": {
+    "buried_city": 6,
+    "dam": 6,
+    "blue_gate": 4,
+    "spaceport": 2
+   },
+   "cond": {
+    "day": 13,
+    "night": 4,
+    "storm": 1
+   },
+   "room": {
+    "breach": 4,
+    "key": 2,
+    "normal": 12
+   },
+   "cont": [
+    [
+     "breach",
+     6
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "casier_rouge",
+     2
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "arpenteur",
+     2
+    ],
+    [
+     "poubelle",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Power Generation Complex",
+     2
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "spaceport",
+     "The Trench",
+     1
+    ],
+    [
+     "buried_city",
+     "Parking Garage",
+     1
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "spaceport",
+     "Vehicle Maintenance",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_barrel_ii_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_barrel_iii_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_light_mag_ii_blueprint": {
+   "n": 22,
+   "maps": {
+    "buried_city": 11,
+    "dam": 5,
+    "spaceport": 4,
+    "blue_gate": 2
+   },
+   "cond": {
+    "night": 9,
+    "day": 12,
+    "storm": 1
+   },
+   "room": {
+    "breach": 9,
+    "normal": 12,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     7
+    ],
+    [
+     "armoire",
+     4
+    ],
+    [
+     "poubelle",
+     2
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "valise",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     3
+    ],
+    [
+     "blue_gate",
+     "Village",
+     2
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     2
+    ],
+    [
+     "buried_city",
+     "Galleria",
+     1
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "spaceport",
+     "Control Tower A6",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_light_mag_iii_blueprint": {
+   "n": 9,
+   "maps": {
+    "dam": 6,
+    "blue_gate": 2,
+    "spaceport": 1
+   },
+   "cond": {
+    "night": 8,
+    "storm": 1
+   },
+   "room": {
+    "normal": 7,
+    "breach": 1,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "casier_rouge",
+     1
+    ],
+    [
+     "breach",
+     1
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "armoire",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Testing Annex",
+     2
+    ],
+    [
+     "spaceport",
+     "Control Tower A6",
+     1
+    ],
+    [
+     "blue_gate",
+     "Ancient Fort",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_medium_mag_ii_blueprint": {
+   "n": 17,
+   "maps": {
+    "buried_city": 8,
+    "dam": 4,
+    "blue_gate": 3,
+    "spaceport": 2
+   },
+   "cond": {
+    "night": 11,
+    "day": 4,
+    "storm": 2
+   },
+   "room": {
+    "breach": 2,
+    "normal": 14,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     5
+    ],
+    [
+     "armoire",
+     5
+    ],
+    [
+     "valise",
+     1
+    ],
+    [
+     "casier_rouge",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Plaza Rosa",
+     2
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_medium_mag_iii_blueprint": {
+   "n": 14,
+   "maps": {
+    "dam": 8,
+    "blue_gate": 4,
+    "buried_city": 2
+   },
+   "cond": {
+    "night": 13,
+    "day": 1
+   },
+   "room": {
+    "normal": 12,
+    "key": 1,
+    "breach": 1
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "casier",
+     2
+    ],
+    [
+     "casier_rouge",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "dam",
+     "South Swamp Outpost",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_shotgun_mag_ii_blueprint": {
+   "n": 15,
+   "maps": {
+    "buried_city": 12,
+    "blue_gate": 2,
+    "spaceport": 1
+   },
+   "cond": {
+    "night": 8,
+    "day": 7
+   },
+   "room": {
+    "normal": 7,
+    "breach": 8
+   },
+   "cont": [
+    [
+     "tiroir",
+     6
+    ],
+    [
+     "poubelle",
+     2
+    ],
+    [
+     "valise",
+     2
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "cache_raider",
+     1
+    ],
+    [
+     "armoire",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Plaza Rosa",
+     2
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "blue_gate",
+     "Outer Gates",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "extended_shotgun_mag_iii_blueprint": {
+   "n": 11,
+   "maps": {
+    "dam": 6,
+    "blue_gate": 4,
+    "spaceport": 1
+   },
+   "cond": {
+    "day": 2,
+    "night": 7,
+    "storm": 2
+   },
+   "room": {
+    "normal": 8,
+    "key": 3
+   },
+   "cont": [
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "poubelle",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Scrap Yard",
+     2
+    ],
+    [
+     "spaceport",
+     "Rocket Assembly",
+     1
+    ],
+    [
+     "blue_gate",
+     "Broken Earth",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "fireworks_box_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": "Test Case",
+   "only": null
+  },
+  "gas_mine_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "green_light_stick_blueprint": {
+   "n": 6,
+   "maps": {
+    "blue_gate": 2,
+    "dam": 2,
+    "buried_city": 2
+   },
+   "cond": {
+    "day": 6
+   },
+   "room": {
+    "breach": 2,
+    "normal": 3,
+    "key": 1
+   },
+   "cont": [
+    [
+     "breach",
+     2
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "tiroir",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     2
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "heavy_gun_parts_blueprint": {
+   "n": 43,
+   "maps": {
+    "dam": 17,
+    "buried_city": 11,
+    "stella_montis": 7,
+    "blue_gate": 4,
+    "spaceport": 4
+   },
+   "cond": {
+    "night": 12,
+    "day": 24
+   },
+   "room": {
+    "key": 7,
+    "breach": 6,
+    "normal": 30
+   },
+   "cont": [
+    [
+     "cache_raider",
+     11
+    ],
+    [
+     "breach",
+     7
+    ],
+    [
+     "armoire",
+     3
+    ],
+    [
+     "sac",
+     3
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "sac_medical",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "stella_montis",
+     "Assembly",
+     2
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     2
+    ],
+    [
+     "buried_city",
+     "Red Tower",
+     2
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     2
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "stella_montis",
+     "Medical Research",
+     1
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     1
+    ],
+    [
+     "dam",
+     "Floodgates",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "hullcracker_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": "The Major's Footlocker",
+   "only": null
+  },
+  "il_toro_blueprint": {
+   "n": 42,
+   "maps": {
+    "dam": 18,
+    "spaceport": 9,
+    "blue_gate": 6,
+    "buried_city": 5,
+    "stella_montis": 4
+   },
+   "cond": {
+    "day": 27,
+    "night": 11
+   },
+   "room": {
+    "normal": 29,
+    "breach": 4,
+    "key": 9
+   },
+   "cont": [
+    [
+     "cache_raider",
+     9
+    ],
+    [
+     "caisse_arme",
+     7
+    ],
+    [
+     "caisse_munitions",
+     6
+    ],
+    [
+     "autre",
+     4
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "breach",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Water Treatment Control",
+     2
+    ],
+    [
+     "blue_gate",
+     "Checkpoint",
+     1
+    ],
+    [
+     "spaceport",
+     "Launch Towers",
+     1
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Maintenance Bunker",
+     1
+    ],
+    [
+     "spaceport",
+     "Container Storage",
+     1
+    ],
+    [
+     "spaceport",
+     "North Trench Tower",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "jolt_mine_blueprint": {
+   "n": 98,
+   "maps": {
+    "dam": 48,
+    "buried_city": 22,
+    "blue_gate": 14,
+    "spaceport": 14
+   },
+   "cond": {
+    "night": 46,
+    "day": 50,
+    "bunker": 1,
+    "storm": 1
+   },
+   "room": {
+    "normal": 72,
+    "key": 17,
+    "breach": 9
+   },
+   "cont": [
+    [
+     "breach",
+     27
+    ],
+    [
+     "casier_rouge",
+     13
+    ],
+    [
+     "casier",
+     12
+    ],
+    [
+     "tiroir",
+     11
+    ],
+    [
+     "autre",
+     6
+    ],
+    [
+     "vehicule",
+     6
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Control Tower",
+     5
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     5
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     4
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     4
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     2
+    ],
+    [
+     "blue_gate",
+     "Checkpoint",
+     2
+    ],
+    [
+     "spaceport",
+     "Container Storage",
+     2
+    ],
+    [
+     "dam",
+     "Primary Facility",
+     2
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "jupiter_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "light_gun_parts_blueprint": {
+   "n": 37,
+   "maps": {
+    "dam": 15,
+    "spaceport": 8,
+    "blue_gate": 7,
+    "buried_city": 5,
+    "stella_montis": 2
+   },
+   "cond": {
+    "day": 24,
+    "night": 11
+   },
+   "room": {
+    "normal": 36,
+    "key": 1
+   },
+   "cont": [
+    [
+     "cache_raider",
+     19
+    ],
+    [
+     "sac",
+     4
+    ],
+    [
+     "arpenteur",
+     2
+    ],
+    [
+     "caisse_munitions",
+     2
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "poubelle",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Raider's Refuge",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "spaceport",
+     "Container Storage",
+     1
+    ],
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "lightweight_stock_blueprint": {
+   "n": 11,
+   "maps": {
+    "dam": 8,
+    "buried_city": 1,
+    "spaceport": 1,
+    "blue_gate": 1
+   },
+   "cond": {
+    "night": 10,
+    "day": 1
+   },
+   "room": {
+    "normal": 11
+   },
+   "cont": [
+    [
+     "armoire",
+     4
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "valise",
+     1
+    ],
+    [
+     "autre",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "dam",
+     "The Breach",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "looting_mk3_safekeeper_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "looting_mk3_survivor_blueprint": {
+   "n": 74,
+   "maps": {
+    "blue_gate": 37,
+    "buried_city": 18,
+    "dam": 8,
+    "spaceport": 7,
+    "stella_montis": 4
+   },
+   "cond": {
+    "day": 43,
+    "night": 26,
+    "bunker": 1
+   },
+   "room": {
+    "breach": 34,
+    "normal": 35,
+    "key": 5
+   },
+   "cont": [
+    [
+     "tiroir",
+     14
+    ],
+    [
+     "casier",
+     13
+    ],
+    [
+     "breach",
+     11
+    ],
+    [
+     "casier_rouge",
+     5
+    ],
+    [
+     "autre",
+     5
+    ],
+    [
+     "boite_noire",
+     4
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     8
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     8
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     6
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     3
+    ],
+    [
+     "buried_city",
+     "Library",
+     2
+    ],
+    [
+     "stella_montis",
+     "Assembly Workshops",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "blue_gate",
+     "Data Vault",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "lure_grenade_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": "Greasing Her Palms",
+   "only": null
+  },
+  "medium_gun_parts_blueprint": {
+   "n": 58,
+   "maps": {
+    "dam": 25,
+    "buried_city": 14,
+    "spaceport": 9,
+    "blue_gate": 6,
+    "stella_montis": 4
+   },
+   "cond": {
+    "day": 39,
+    "night": 14,
+    "storm": 1
+   },
+   "room": {
+    "normal": 46,
+    "breach": 6,
+    "key": 6
+   },
+   "cont": [
+    [
+     "cache_raider",
+     16
+    ],
+    [
+     "caisse_arme",
+     5
+    ],
+    [
+     "autre",
+     5
+    ],
+    [
+     "caisse_munitions",
+     5
+    ],
+    [
+     "breach",
+     4
+    ],
+    [
+     "sac_medical",
+     3
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Red Tower",
+     2
+    ],
+    [
+     "dam",
+     "Water Towers",
+     2
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     2
+    ],
+    [
+     "spaceport",
+     "Launch Towers",
+     2
+    ],
+    [
+     "dam",
+     "Hydroponic Dome Complex",
+     2
+    ],
+    [
+     "stella_montis",
+     "Lobby Metro",
+     1
+    ],
+    [
+     "spaceport",
+     "The Trench",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "muzzle_brake_ii_blueprint": {
+   "n": 19,
+   "maps": {
+    "dam": 8,
+    "buried_city": 6,
+    "blue_gate": 3,
+    "spaceport": 2
+   },
+   "cond": {
+    "day": 10,
+    "night": 9
+   },
+   "room": {
+    "normal": 13,
+    "key": 4,
+    "breach": 2
+   },
+   "cont": [
+    [
+     "tiroir",
+     8
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "sac_medical",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "autre",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "spaceport",
+     "North Trench Tower",
+     1
+    ],
+    [
+     "dam",
+     "South Swamp Outpost",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "muzzle_brake_iii_blueprint": {
+   "n": 14,
+   "maps": {
+    "dam": 8,
+    "buried_city": 3,
+    "blue_gate": 2,
+    "stella_montis": 1
+   },
+   "cond": {
+    "night": 8,
+    "day": 4,
+    "storm": 1
+   },
+   "room": {
+    "normal": 12,
+    "key": 1,
+    "breach": 1
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "arpenteur",
+     2
+    ],
+    [
+     "armoire",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "vehicule",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     2
+    ],
+    [
+     "dam",
+     "Pattern House",
+     2
+    ],
+    [
+     "stella_montis",
+     "Assembly",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "osprey_blueprint": {
+   "n": 87,
+   "maps": {
+    "dam": 34,
+    "buried_city": 22,
+    "spaceport": 15,
+    "blue_gate": 13,
+    "stella_montis": 3
+   },
+   "cond": {
+    "night": 29,
+    "day": 55
+   },
+   "room": {
+    "normal": 66,
+    "breach": 10,
+    "key": 11
+   },
+   "cont": [
+    [
+     "cache_raider",
+     23
+    ],
+    [
+     "caisse_arme",
+     9
+    ],
+    [
+     "autre",
+     9
+    ],
+    [
+     "breach",
+     6
+    ],
+    [
+     "caisse_munitions",
+     5
+    ],
+    [
+     "sac_medical",
+     4
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Village",
+     3
+    ],
+    [
+     "dam",
+     "Old Battleground",
+     2
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     2
+    ],
+    [
+     "dam",
+     "Water Towers",
+     2
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     2
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     2
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     2
+    ],
+    [
+     "blue_gate",
+     "Ancient Fort",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "padded_stock_blueprint": {
+   "n": 10,
+   "maps": {
+    "dam": 5,
+    "spaceport": 2,
+    "blue_gate": 2,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 7,
+    "day": 2,
+    "storm": 1
+   },
+   "room": {
+    "normal": 9,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "arpenteur",
+     2
+    ],
+    [
+     "casier_rouge",
+     1
+    ],
+    [
+     "vehicule",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "dam",
+     "Generator Hall",
+     1
+    ],
+    [
+     "spaceport",
+     "South Trench Tower",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "powered_descender_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "pulse_mine_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "rascal_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "red_light_stick_blueprint": {
+   "n": 12,
+   "maps": {
+    "blue_gate": 5,
+    "buried_city": 3,
+    "dam": 3,
+    "spaceport": 1
+   },
+   "cond": {
+    "night": 2,
+    "day": 9,
+    "storm": 1
+   },
+   "room": {
+    "breach": 4,
+    "key": 3,
+    "normal": 5
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "casier",
+     2
+    ],
+    [
+     "tiroir",
+     1
+    ],
+    [
+     "cache_raider",
+     1
+    ],
+    [
+     "caisse_arme",
+     1
+    ],
+    [
+     "electronique",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     2
+    ],
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     2
+    ],
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     1
+    ],
+    [
+     "spaceport",
+     "North Trench Tower",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "remote_raider_flare_blueprint": {
+   "n": 9,
+   "maps": {
+    "blue_gate": 4,
+    "dam": 3,
+    "spaceport": 1,
+    "buried_city": 1
+   },
+   "cond": {
+    "day": 7,
+    "night": 2
+   },
+   "room": {
+    "normal": 8,
+    "key": 1
+   },
+   "cont": [
+    [
+     "breach",
+     2
+    ],
+    [
+     "electronique",
+     2
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "sac_medical",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     1
+    ],
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     1
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ],
+    [
+     "spaceport",
+     "North Trench Tower",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "seeker_grenade_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "shotgun_choke_ii_blueprint": {
+   "n": 17,
+   "maps": {
+    "buried_city": 10,
+    "dam": 4,
+    "spaceport": 3
+   },
+   "cond": {
+    "day": 7,
+    "night": 10
+   },
+   "room": {
+    "normal": 13,
+    "breach": 3,
+    "key": 1
+   },
+   "cont": [
+    [
+     "tiroir",
+     5
+    ],
+    [
+     "armoire",
+     4
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "sac",
+     1
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Red Tower",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "shotgun_choke_iii_blueprint": {
+   "n": 16,
+   "maps": {
+    "dam": 7,
+    "blue_gate": 5,
+    "spaceport": 3,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 12,
+    "day": 3,
+    "storm": 1
+   },
+   "room": {
+    "normal": 14,
+    "key": 2
+   },
+   "cont": [
+    [
+     "arpenteur",
+     4
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "valise",
+     1
+    ],
+    [
+     "casier_rouge",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "spaceport",
+     "Launch Towers",
+     1
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     1
+    ],
+    [
+     "dam",
+     "Ben Welder's Sunroof",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ],
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "blue_gate",
+     "Ruined Homestead",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "shotgun_silencer_blueprint": {
+   "n": 8,
+   "maps": {
+    "dam": 7,
+    "blue_gate": 1
+   },
+   "cond": {
+    "night": 6,
+    "storm": 2
+   },
+   "room": {
+    "normal": 8
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "armoire",
+     1
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "blue_gate",
+     "Adorned Wreckage",
+     1
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "showstopper_blueprint": {
+   "n": 27,
+   "maps": {
+    "dam": 15,
+    "buried_city": 5,
+    "blue_gate": 5,
+    "spaceport": 2
+   },
+   "cond": {
+    "night": 10,
+    "day": 17
+   },
+   "room": {
+    "normal": 22,
+    "key": 3,
+    "breach": 2
+   },
+   "cont": [
+    [
+     "casier_rouge",
+     7
+    ],
+    [
+     "breach",
+     6
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "casier",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Control Tower",
+     2
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     2
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     2
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ],
+    [
+     "blue_gate",
+     "Raider's Refuge",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "silencer_i_blueprint": {
+   "n": 27,
+   "maps": {
+    "dam": 12,
+    "buried_city": 12,
+    "blue_gate": 3
+   },
+   "cond": {
+    "night": 10,
+    "day": 15,
+    "storm": 2
+   },
+   "room": {
+    "normal": 22,
+    "breach": 3,
+    "key": 2
+   },
+   "cont": [
+    [
+     "tiroir",
+     9
+    ],
+    [
+     "autre",
+     4
+    ],
+    [
+     "armoire",
+     3
+    ],
+    [
+     "poubelle",
+     2
+    ],
+    [
+     "arpenteur",
+     2
+    ],
+    [
+     "caisse",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     5
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     1
+    ],
+    [
+     "buried_city",
+     "Red Tower",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "silencer_ii_blueprint": {
+   "n": 64,
+   "maps": {
+    "buried_city": 32,
+    "dam": 14,
+    "spaceport": 10,
+    "blue_gate": 6,
+    "stella_montis": 2
+   },
+   "cond": {
+    "day": 31,
+    "night": 29,
+    "storm": 2
+   },
+   "room": {
+    "normal": 41,
+    "breach": 15,
+    "key": 8
+   },
+   "cont": [
+    [
+     "tiroir",
+     29
+    ],
+    [
+     "armoire",
+     9
+    ],
+    [
+     "poubelle",
+     4
+    ],
+    [
+     "autre",
+     4
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "arpenteur",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Plaza Rosa",
+     6
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     4
+    ],
+    [
+     "blue_gate",
+     "Village",
+     4
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     3
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     3
+    ],
+    [
+     "spaceport",
+     "Container Storage",
+     2
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     2
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     2
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "smoke_grenade_blueprint": {
+   "n": 42,
+   "maps": {
+    "buried_city": 17,
+    "dam": 13,
+    "blue_gate": 7,
+    "spaceport": 3,
+    "stella_montis": 2
+   },
+   "cond": {
+    "night": 20,
+    "day": 19,
+    "bunker": 1
+   },
+   "room": {
+    "normal": 33,
+    "breach": 7,
+    "key": 2
+   },
+   "cont": [
+    [
+     "tiroir",
+     11
+    ],
+    [
+     "armoire",
+     8
+    ],
+    [
+     "bureau",
+     3
+    ],
+    [
+     "valise",
+     3
+    ],
+    [
+     "poubelle",
+     3
+    ],
+    [
+     "arpenteur",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     4
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     3
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     2
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     2
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ],
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     1
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     1
+    ]
+   ],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "snap_hook_blueprint": {
+   "n": 91,
+   "maps": {
+    "dam": 54,
+    "blue_gate": 20,
+    "spaceport": 12,
+    "buried_city": 5
+   },
+   "cond": {
+    "day": 13,
+    "night": 42,
+    "storm": 36
+   },
+   "room": {
+    "normal": 77,
+    "breach": 6,
+    "key": 8
+   },
+   "cont": [
+    [
+     "tiroir",
+     30
+    ],
+    [
+     "breach",
+     14
+    ],
+    [
+     "casier_rouge",
+     10
+    ],
+    [
+     "autre",
+     9
+    ],
+    [
+     "casier",
+     7
+    ],
+    [
+     "electronique",
+     4
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Research & Administration",
+     9
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     5
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     3
+    ],
+    [
+     "blue_gate",
+     "Village",
+     3
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     3
+    ],
+    [
+     "dam",
+     "Power Generation Complex",
+     2
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     2
+    ],
+    [
+     "dam",
+     "The Breach",
+     2
+    ]
+   ],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "stable_stock_ii_blueprint": {
+   "n": 16,
+   "maps": {
+    "buried_city": 7,
+    "dam": 6,
+    "blue_gate": 3
+   },
+   "cond": {
+    "day": 6,
+    "night": 9,
+    "storm": 1
+   },
+   "room": {
+    "normal": 12,
+    "key": 1,
+    "breach": 3
+   },
+   "cont": [
+    [
+     "tiroir",
+     5
+    ],
+    [
+     "armoire",
+     4
+    ],
+    [
+     "casier_rouge",
+     2
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "electronique",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     1
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "stable_stock_iii_blueprint": {
+   "n": 12,
+   "maps": {
+    "dam": 5,
+    "blue_gate": 3,
+    "spaceport": 3,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 6,
+    "day": 4,
+    "bunker": 2
+   },
+   "room": {
+    "normal": 12
+   },
+   "cont": [
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "tiroir",
+     2
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "breach",
+     1
+    ],
+    [
+     "autre",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Library",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "surge_coil_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "tactical_mk3_defensive_blueprint": {
+   "n": 24,
+   "maps": {
+    "blue_gate": 13,
+    "buried_city": 3,
+    "stella_montis": 3,
+    "spaceport": 3,
+    "dam": 2
+   },
+   "cond": {
+    "night": 6,
+    "day": 14,
+    "bunker": 1
+   },
+   "room": {
+    "normal": 10,
+    "breach": 13,
+    "key": 1
+   },
+   "cont": [
+    [
+     "casier",
+     5
+    ],
+    [
+     "tiroir",
+     5
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "caisse",
+     3
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "boite_noire",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     7
+    ],
+    [
+     "dam",
+     "Pattern House",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ],
+    [
+     "stella_montis",
+     "Seed Vault",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Piazza Arbusto",
+     1
+    ],
+    [
+     "dam",
+     "South Swamp Outpost",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "tactical_mk3_healing_blueprint": {
+   "n": 31,
+   "maps": {
+    "blue_gate": 15,
+    "buried_city": 10,
+    "dam": 3,
+    "spaceport": 2,
+    "stella_montis": 1
+   },
+   "cond": {
+    "day": 14,
+    "night": 15,
+    "storm": 1
+   },
+   "room": {
+    "breach": 15,
+    "normal": 14,
+    "key": 2
+   },
+   "cont": [
+    [
+     "casier",
+     5
+    ],
+    [
+     "tiroir",
+     5
+    ],
+    [
+     "caisse",
+     3
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "arpenteur",
+     3
+    ],
+    [
+     "autre",
+     3
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Reinforced Reception",
+     5
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     3
+    ],
+    [
+     "buried_city",
+     "Space Travel",
+     2
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "stella_montis",
+     "Assembly",
+     1
+    ],
+    [
+     "buried_city",
+     "Library",
+     1
+    ],
+    [
+     "buried_city",
+     "Parking Garage",
+     1
+    ],
+    [
+     "dam",
+     "Control Tower",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "tactical_mk3_revival_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "tactical_mk3_smoke_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "tagging_grenade_blueprint": {
+   "n": 14,
+   "maps": {
+    "spaceport": 6,
+    "buried_city": 3,
+    "dam": 2,
+    "blue_gate": 2,
+    "stella_montis": 1
+   },
+   "cond": {
+    "night": 9,
+    "day": 4
+   },
+   "room": {
+    "normal": 12,
+    "key": 1,
+    "breach": 1
+   },
+   "cont": [
+    [
+     "arpenteur",
+     5
+    ],
+    [
+     "breach",
+     3
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "electronique",
+     1
+    ],
+    [
+     "tiroir",
+     1
+    ],
+    [
+     "casier",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "blue_gate",
+     "Pilgrim's Peak",
+     1
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "stella_montis",
+     "Lobby",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "tempest_blueprint": {
+   "n": 173,
+   "maps": {
+    "buried_city": 113,
+    "spaceport": 28,
+    "dam": 25,
+    "blue_gate": 7
+   },
+   "cond": {
+    "night": 170,
+    "day": 2,
+    "storm": 1
+   },
+   "room": {
+    "key": 13,
+    "normal": 137,
+    "breach": 23
+   },
+   "cont": [
+    [
+     "tiroir",
+     73
+    ],
+    [
+     "armoire",
+     28
+    ],
+    [
+     "autre",
+     14
+    ],
+    [
+     "bureau",
+     9
+    ],
+    [
+     "valise",
+     8
+    ],
+    [
+     "poubelle",
+     7
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     15
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     15
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     9
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     8
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     8
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     7
+    ],
+    [
+     "blue_gate",
+     "Village",
+     7
+    ],
+    [
+     "dam",
+     "Pattern House",
+     3
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "torrente_blueprint": {
+   "n": 63,
+   "maps": {
+    "dam": 26,
+    "buried_city": 16,
+    "spaceport": 8,
+    "stella_montis": 7,
+    "blue_gate": 6
+   },
+   "cond": {
+    "day": 39,
+    "bunker": 1,
+    "night": 15,
+    "storm": 1
+   },
+   "room": {
+    "normal": 47,
+    "breach": 8,
+    "key": 8
+   },
+   "cont": [
+    [
+     "cache_raider",
+     22
+    ],
+    [
+     "caisse_arme",
+     7
+    ],
+    [
+     "sac",
+     7
+    ],
+    [
+     "caisse_munitions",
+     5
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "sac_medical",
+     2
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Water Treatment Control",
+     3
+    ],
+    [
+     "blue_gate",
+     "Ancient Fort",
+     2
+    ],
+    [
+     "stella_montis",
+     "Lobby",
+     2
+    ],
+    [
+     "spaceport",
+     "Launch Towers",
+     1
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "spaceport",
+     "Fuel Control",
+     1
+    ],
+    [
+     "spaceport",
+     "The Trench",
+     1
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "trailblazer_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": true,
+   "quest": null,
+   "only": "stella_montis"
+  },
+  "trigger_nade_blueprint": {
+   "n": 10,
+   "maps": {
+    "dam": 5,
+    "spaceport": 2,
+    "blue_gate": 2,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 4,
+    "day": 5,
+    "bunker": 1
+   },
+   "room": {
+    "normal": 9,
+    "breach": 1
+   },
+   "cont": [
+    [
+     "casier_rouge",
+     3
+    ],
+    [
+     "casier",
+     2
+    ],
+    [
+     "breach",
+     2
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "autre",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Water Treatment Control",
+     1
+    ],
+    [
+     "dam",
+     "The Breach",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ]
+   ],
+   "trials": false,
+   "quest": "Sparks Fly",
+   "only": null
+  },
+  "venator_blueprint": {
+   "n": 110,
+   "maps": {
+    "dam": 51,
+    "buried_city": 20,
+    "spaceport": 14,
+    "blue_gate": 13,
+    "stella_montis": 12
+   },
+   "cond": {
+    "night": 34,
+    "day": 63,
+    "storm": 1
+   },
+   "room": {
+    "normal": 87,
+    "key": 11,
+    "breach": 12
+   },
+   "cont": [
+    [
+     "cache_raider",
+     38
+    ],
+    [
+     "caisse_arme",
+     12
+    ],
+    [
+     "sac",
+     11
+    ],
+    [
+     "breach",
+     7
+    ],
+    [
+     "autre",
+     7
+    ],
+    [
+     "caisse_munitions",
+     5
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Testing Annex",
+     3
+    ],
+    [
+     "stella_montis",
+     "Lobby",
+     3
+    ],
+    [
+     "dam",
+     "The Breach",
+     2
+    ],
+    [
+     "blue_gate",
+     "Raider's Refuge",
+     2
+    ],
+    [
+     "dam",
+     "Formicai Outpost",
+     2
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     2
+    ],
+    [
+     "dam",
+     "Water Treatment Control",
+     2
+    ],
+    [
+     "dam",
+     "Scrap Yard",
+     2
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "vertical_grip_ii_blueprint": {
+   "n": 18,
+   "maps": {
+    "buried_city": 12,
+    "dam": 3,
+    "blue_gate": 3
+   },
+   "cond": {
+    "night": 13,
+    "day": 5
+   },
+   "room": {
+    "key": 3,
+    "breach": 5,
+    "normal": 10
+   },
+   "cont": [
+    [
+     "tiroir",
+     11
+    ],
+    [
+     "autre",
+     2
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "breach",
+     1
+    ],
+    [
+     "valise",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     3
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "blue_gate",
+     "Village",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "vertical_grip_iii_blueprint": {
+   "n": 50,
+   "maps": {
+    "buried_city": 24,
+    "dam": 16,
+    "spaceport": 8,
+    "stella_montis": 1,
+    "blue_gate": 1
+   },
+   "cond": {
+    "bunker": 1,
+    "day": 18,
+    "night": 27,
+    "storm": 3
+   },
+   "room": {
+    "breach": 10,
+    "normal": 36,
+    "key": 4
+   },
+   "cont": [
+    [
+     "tiroir",
+     14
+    ],
+    [
+     "armoire",
+     12
+    ],
+    [
+     "poubelle",
+     4
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "casier_rouge",
+     3
+    ],
+    [
+     "valise",
+     3
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     4
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     4
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     3
+    ],
+    [
+     "spaceport",
+     "Departure Building",
+     2
+    ],
+    [
+     "dam",
+     "Research & Administration",
+     2
+    ],
+    [
+     "buried_city",
+     "Santa Maria Houses",
+     2
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     2
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "vita_shot_blueprint": {
+   "n": 17,
+   "maps": {
+    "dam": 6,
+    "stella_montis": 4,
+    "buried_city": 4,
+    "spaceport": 2,
+    "blue_gate": 1
+   },
+   "cond": {
+    "night": 8,
+    "day": 5
+   },
+   "room": {
+    "normal": 12,
+    "key": 5
+   },
+   "cont": [
+    [
+     "tiroir",
+     6
+    ],
+    [
+     "arpenteur",
+     5
+    ],
+    [
+     "armoire",
+     2
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "dam",
+     "Testing Annex",
+     3
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     2
+    ],
+    [
+     "spaceport",
+     "The Trench",
+     1
+    ],
+    [
+     "stella_montis",
+     "Lobby",
+     1
+    ],
+    [
+     "stella_montis",
+     "Medical Research",
+     1
+    ],
+    [
+     "buried_city",
+     "Research",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "vita_spray_blueprint": {
+   "n": 22,
+   "maps": {
+    "buried_city": 13,
+    "dam": 5,
+    "spaceport": 3,
+    "stella_montis": 1
+   },
+   "cond": {
+    "day": 11,
+    "night": 10
+   },
+   "room": {
+    "normal": 18,
+    "breach": 3,
+    "key": 1
+   },
+   "cont": [
+    [
+     "arpenteur",
+     4
+    ],
+    [
+     "tiroir",
+     3
+    ],
+    [
+     "autre",
+     3
+    ],
+    [
+     "casier",
+     2
+    ],
+    [
+     "cache_raider",
+     1
+    ],
+    [
+     "vehicule",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Hospital",
+     2
+    ],
+    [
+     "stella_montis",
+     "Loading Bay",
+     1
+    ],
+    [
+     "dam",
+     "The Breach",
+     1
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     1
+    ],
+    [
+     "buried_city",
+     "Library",
+     1
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "dam",
+     "Testing Annex",
+     1
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": "Worth Your Salt",
+   "only": null
+  },
+  "vulcano_blueprint": {
+   "n": 12,
+   "maps": {
+    "spaceport": 11,
+    "buried_city": 1
+   },
+   "cond": {
+    "bunker": 11,
+    "night": 1
+   },
+   "room": {
+    "breach": 1,
+    "normal": 6,
+    "key": 5
+   },
+   "cont": [
+    [
+     "breach",
+     3
+    ],
+    [
+     "casier_rouge",
+     3
+    ],
+    [
+     "tiroir",
+     1
+    ],
+    [
+     "bureau",
+     1
+    ],
+    [
+     "poubelle",
+     1
+    ],
+    [
+     "casier",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "spaceport",
+     "Launch Towers",
+     2
+    ],
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Red Tower",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "white_flag_blueprint": {
+   "n": 0,
+   "maps": {},
+   "cond": {},
+   "room": {},
+   "cont": [],
+   "poi": [],
+   "trials": false,
+   "quest": null,
+   "only": null
+  },
+  "wolfpack_blueprint": {
+   "n": 366,
+   "maps": {
+    "buried_city": 179,
+    "dam": 119,
+    "spaceport": 42,
+    "blue_gate": 26
+   },
+   "cond": {
+    "night": 343,
+    "day": 19,
+    "storm": 4
+   },
+   "room": {
+    "key": 34,
+    "normal": 268,
+    "breach": 64
+   },
+   "cont": [
+    [
+     "tiroir",
+     140
+    ],
+    [
+     "armoire",
+     55
+    ],
+    [
+     "autre",
+     32
+    ],
+    [
+     "poubelle",
+     29
+    ],
+    [
+     "bureau",
+     23
+    ],
+    [
+     "valise",
+     9
+    ]
+   ],
+   "poi": [
+    [
+     "buried_city",
+     "Space Travel",
+     23
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     22
+    ],
+    [
+     "buried_city",
+     "Grandioso Apartments",
+     19
+    ],
+    [
+     "buried_city",
+     "Plaza Rosa",
+     15
+    ],
+    [
+     "dam",
+     "Pale Apartments",
+     15
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     14
+    ],
+    [
+     "buried_city",
+     "Town Hall",
+     12
+    ],
+    [
+     "blue_gate",
+     "Village",
+     11
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  },
+  "yellow_light_stick_blueprint": {
+   "n": 10,
+   "maps": {
+    "dam": 4,
+    "blue_gate": 3,
+    "spaceport": 2,
+    "buried_city": 1
+   },
+   "cond": {
+    "night": 5,
+    "day": 5
+   },
+   "room": {
+    "breach": 2,
+    "normal": 8
+   },
+   "cont": [
+    [
+     "autre",
+     2
+    ],
+    [
+     "casier_rouge",
+     1
+    ],
+    [
+     "caisse",
+     1
+    ],
+    [
+     "arpenteur",
+     1
+    ],
+    [
+     "casier",
+     1
+    ],
+    [
+     "breach",
+     1
+    ]
+   ],
+   "poi": [
+    [
+     "spaceport",
+     "Arrival Building",
+     1
+    ],
+    [
+     "buried_city",
+     "Hospital",
+     1
+    ],
+    [
+     "dam",
+     "Ruby Residence",
+     1
+    ]
+   ],
+   "trials": true,
+   "quest": null,
+   "only": null
+  }
+ }
+}
