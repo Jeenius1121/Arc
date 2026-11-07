@@ -47,12 +47,12 @@ function placeLabels(pos, { focus, routeIdx, labels, X, Y, sizeOf }) {
     const w = p.n.length * fs * 0.66 + 6;
     const s = sizeOf(p);
     const x = X(p), y = Y(p);
-    const tries = [[1, 0], [-1, 0], [1, -30], [1, 30], [-1, -30], [-1, 30], [1, -56], [-1, 56]];
+    const tries = [[1, 0], [-1, 0], [1, -30], [1, 30], [-1, -30], [-1, 30], [0, 44], [0, -50], [1, -56], [-1, 56]];
     for (const [side, dy] of tries) {
-      const anchor = side > 0 ? 'start' : 'end';
+      const anchor = side > 0 ? 'start' : side < 0 ? 'end' : 'middle';
       const tx = x + side * (s + 9);
       const ty = y + 8 + dy;
-      const b = side > 0 ? [tx, ty - fs * 0.8, tx + w, ty + 4] : [tx - w, ty - fs * 0.8, tx, ty + 4];
+      const b = side > 0 ? [tx, ty - fs * 0.8, tx + w, ty + 4] : side < 0 ? [tx - w, ty - fs * 0.8, tx, ty + 4] : [tx - w / 2, ty - fs * 0.8, tx + w / 2, ty + 4];
       if (b[0] < 4 || b[2] > 996 || b[1] < 30 || b[3] > 996) continue;
       if (hit(b)) continue;
       boxes.push(b);
@@ -127,7 +127,7 @@ export function mapSVG(map, opts = {}) {
     </defs>
     <rect width="1000" height="1000" fill="url(#mg-${map.id})"/>
     ${contours(map.id)}
-    ${grid}${ticks}
+    ${grid}
     <g transform="translate(940 70)"><circle r="26" fill="none" stroke="rgba(239,231,214,.25)" stroke-width="2"/><path d="M0-20 7 4 0 0-7 4Z" fill="#ff5a1f"/><text y="-32" text-anchor="middle" font-size="17" fill="rgba(239,231,214,.5)">N</text></g>
     ${routePath}
     ${pins}
