@@ -1,0 +1,78 @@
+# Copie ce fichier en config.yaml et adapte-le à ton jeu.
+# Toutes les coordonnées sont en pixels dans une image de 1280x720
+# (la capture est redimensionnée à cette taille, quelle que soit ta fenêtre).
+
+source:
+  type: window            # window | monitor | region | capture_card | file
+  window_title: chiaki    # morceau du titre de la fenêtre chiaki-ng (ou "PS Remote Play")
+  # type: capture_card
+  # device: 0             # n° de la carte d'acquisition (0, 1, 2...)
+  # type: file
+  # path: screenshots/    # pour rejouer des captures sans la PS5
+  size: [1280, 720]
+
+controller: virtual_ds4   # virtual_ds4 (manette virtuelle) | dry_run (n'envoie rien)
+fps: 10                   # images analysées par seconde
+start_delay: 3            # secondes avant le démarrage
+preview: false            # true = fenêtre de debug (ou option --preview)
+
+# Les règles sont évaluées dans l'ordre, à chaque image.
+# La première qui se déclenche s'exécute ; avec `stop: false`, on continue
+# à évaluer les suivantes.
+rules:
+  # 1) Une image précise apparaît (ex. l'invite « X Continuer ») → appuyer sur X
+  - name: Valider l'écran de résultats
+    when:
+      template: templates/bouton_continuer.png   # découpé avec `python -m ps5bot crop`
+      region: [980, 620, 300, 100]               # où chercher (plus petit = plus rapide et fiable)
+      threshold: 0.85                            # 0..1, plus haut = plus strict
+    do:
+      - tap: cross
+      - wait: 1.0
+    cooldown: 2.0
+
+  # 2) Couleur d'un pixel → combinaison de boutons
+  - name: Menu de pause ouvert par erreur
+    enabled: false
+    when:
+      color: [255, 255, 255]   # RGB
+      at: [640, 100]
+      tolerance: 25
+    do:
+      - tap: circle
+
+  # 3) Plusieurs conditions : tout doit être vrai (liste), `not` pour inverser
+  - name: Exemple combiné
+    enabled: false
+    when:
+      - template: templates/icone_inventaire.png
+        region: [0, 0, 400, 200]
+      - not:
+          color: [200, 30, 30]
+          region: [40, 680, 300, 12]   # barre rouge
+          min_ratio: 0.5               # au moins 50 % des pixels de cette couleur
+    edge: true      # ne se déclenche qu'au moment où la condition devient vraie
+    do:
+      - dpad: down
+      - wait: 0.3
+      - hold: {button: square, duration: 1.5}
+      - stick: {side: left, x: 0, y: -1, duration: 0.5}   # y = -1 : vers le haut
+      - repeat:
+          times: 3
+          do:
+            - tap: r1
+            - wait: 0.2
+      - log: "séquence terminée"
+
+# Actions disponibles :
+#   tap: cross                         appui bref (ou {button: cross, duration: 0.1})
+#   hold: {button: r2, duration: 2}    maintenir puis relâcher
+#   press: l1 / release: l1            appuyer / relâcher séparément
+#   stick: {side: left|right, x: -1..1, y: -1..1, duration: 0.5}
+#   trigger: {side: l2|r2, value: 0..1, duration: 1}
+#   dpad: up|down|left|right|up_left|...  (ou {direction: down, duration: 0.2})
+#   wait: 0.5
+#   repeat: {times: 3, do: [...]}
+#   log: "message"
+#   reset                              tout relâcher
+# Boutons : cross circle square triangle l1 r1 l2 r2 l3 r3 options create ps touchpad
